@@ -6,21 +6,16 @@ export function getDashboardStats() {
 }
 
 // 获取快递趋势数据
-export function getExpressTrend(params) {
-  return request.get('/statistics/express-trend', { params })
+export function getExpressTrend() {
+  return request.get('/statistics/express-trend')
 }
 
-// 获取用电量统计
-export function getElectricityStats() {
-  return request.get('/statistics/electricity')
-}
-
-// 获取快递公司占比
-export function getCompanyRatio() {
-  return request.get('/statistics/company-ratio')
+// 获取快递公司分布
+export function getCompanyDistribution() {
+  return request.get('/statistics/company-distribution')
 }
 
 // 获取仓门使用率
-export function getUsageRate() {
-  return request.get('/statistics/usage-rate')
+export function getLockerUsage() {
+  return request.get('/statistics/locker-usage')
 }

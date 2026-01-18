@@ -35,6 +35,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import * as echarts from 'echarts'
+import { getExpressTrend, getCompanyDistribution, getLockerUsage } from '@/api/statistics'
 
 const electricityChartRef = ref()
 const companyChartRef = ref()
@@ -62,42 +63,60 @@ const initElectricityChart = () => {
   })
 }
 
-const initCompanyChart = () => {
+const initCompanyChart = async () => {
   const chart = echarts.init(companyChartRef.value)
-  chart.setOption({
-    tooltip: { trigger: 'item' },
-    legend: { bottom: '5%' },
-    series: [{
-      type: 'pie',
-      radius: ['40%', '70%'],
-      data: [
-        { value: 35, name: '顺丰' },
-        { value: 28, name: '圆通' },
-        { value: 22, name: '中通' },
-        { value: 15, name: '韵达' }
-      ]
-    }]
-  })
+  try {
+    const res = await getCompanyDistribution()
+    chart.setOption({
+      tooltip: { trigger: 'item' },
+      legend: { bottom: '5%' },
+      series: [{
+        type: 'pie',
+        radius: ['40%', '70%'],
+        data: res.data
+      }]
+    })
+  } catch(e) { console.error(e) }
 }
 
-const initMonthlyChart = () => {
+const initMonthlyChart = async () => {
   const chart = echarts.init(monthlyChartRef.value)
-  chart.setOption({
-    tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: ['1月', '2月', '3月', '4月', '5月', '6月'] },
-    yAxis: { type: 'value' },
-    series: [{
-      data: [820, 932, 901, 1034, 1290, 1330],
-      type: 'line',
-      smooth: true,
-      areaStyle: { opacity: 0.3 }
-    }]
-  })
+  try {
+    const res = await getExpressTrend()
+    chart.setOption({
+      tooltip: { trigger: 'axis' },
+      xAxis: { type: 'category', data: res.data.dates },
+      yAxis: { type: 'value' },
+      series: [{
+        data: res.data.values,
+        type: 'line',
+        smooth: true,
+        areaStyle: { opacity: 0.3 }
+      }]
+    })
+  } catch(e) { console.error(e) }
 }
 
-const initUsageChart = () => {
+const initUsageChart = async () => {
   const chart = echarts.init(usageChartRef.value)
-  chart.setOption({
+  try {
+    const res = await getLockerUsage()
+    const lockers = res.data.map(item => item.lockerId)
+    const rates = res.data.map(item => item.usageRate)
+    
+    chart.setOption({
+      tooltip: { trigger: 'axis' },
+      xAxis: { type: 'category', data: lockers },
+      yAxis: { type: 'value', max: 100, name: '%' },
+      series: [{
+        data: rates,
+        type: 'bar',
+        itemStyle: { color: '#67C23A' }
+      }]
+    })
+  } catch(e) { console.error(e) }
+}
+</script>
     tooltip: { trigger: 'axis' },
     xAxis: { type: 'category', data: ['小仓', '中仓', '大仓'] },
     yAxis: { type: 'value', max: 100, name: '%' },

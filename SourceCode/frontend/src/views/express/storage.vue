@@ -10,7 +10,7 @@
           <el-input v-model="searchForm.depositor" placeholder="请输入寄存人" clearable />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
+          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable style="width: 200px">
             <el-option label="寄存中" value="寄存中" />
             <el-option label="已取出" value="已取出" />
           </el-select>
@@ -22,9 +22,10 @@
 
       <el-table :data="tableData" style="width: 100%">
         <el-table-column prop="id" label="记录ID" width="100" />
-        <el-table-column prop="depositor" label="寄存人" width="100" />
-        <el-table-column prop="locker" label="快递柜" width="100" />
-        <el-table-column prop="compartment" label="仓门号" width="80" />
+        <el-table-column prop="depositorName" label="寄存人" width="100" />
+        <el-table-column prop="depositorPhone" label="手机号" width="130" />
+        <el-table-column prop="lockerId" label="快递柜" width="100" />
+        <el-table-column prop="compartmentId" label="仓门号" width="100" />
         <el-table-column prop="pickupCode" label="取件码" width="100" />
         <el-table-column prop="depositTime" label="寄存时间" width="160" />
         <el-table-column prop="pickupTime" label="取出时间" width="160" />
@@ -47,18 +48,32 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { getStorageList } from '@/api/express'
 
 const searchForm = reactive({ depositor: '', status: '' })
-const pagination = reactive({ current: 1, pageSize: 10, total: 50 })
+const pagination = reactive({ current: 1, pageSize: 10, total: 0 })
+const tableData = ref([])
 
-const tableData = ref([
-  { id: 'S001', depositor: '张明', locker: 'L001', compartment: 'C02', pickupCode: '998877', depositTime: '2026-01-18 11:00', pickupTime: '-', status: '寄存中' },
-  { id: 'S002', depositor: '王丽', locker: 'L002', compartment: 'C04', pickupCode: '556677', depositTime: '2026-01-17 15:30', pickupTime: '2026-01-17 18:00', status: '已取出' }
-])
+onMounted(() => loadData())
 
-const handleSearch = () => ElMessage.success('查询成功')
+const loadData = async () => {
+  try {
+    const res = await getStorageList({
+      page: pagination.current,
+      pageSize: pagination.pageSize,
+      ...searchForm
+    })
+    tableData.value = res.data.list
+    pagination.total = res.data.total
+  } catch(e) { console.error(e) }
+}
+
+const handleSearch = () => {
+  pagination.current = 1
+  loadData()
+}
 </script>
 
 <style lang="scss" scoped>

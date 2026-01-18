@@ -35,6 +35,26 @@ public class UserController {
         return Result.success(data);
     }
     
+    @PostMapping
+    public Result<User> add(@RequestBody User user) {
+        if(userRepository.findByUsername(user.getUsername()) != null) {
+            return Result.error("用户名已存在");
+        }
+        user.setPassword("123456"); // Default password
+        return Result.success(userRepository.save(user));
+    }
+
+    @PutMapping("/{id}")
+    public Result<User> update(@PathVariable Long id, @RequestBody User user) {
+        User exist = userRepository.findById(id).orElse(null);
+        if(exist == null) return Result.error("User not found");
+        
+        exist.setName(user.getName());
+        exist.setPhone(user.getPhone());
+        // Don't update password or username here for simplicity
+        return Result.success(userRepository.save(exist));
+    }
+    
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         userRepository.deleteById(id);

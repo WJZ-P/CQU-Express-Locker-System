@@ -34,4 +34,25 @@ public class ExpressController {
         data.put("total", pageResult.getTotalElements());
         return Result.success(data);
     }
+
+    @PostMapping
+    public Result<ExpressOrder> create(@RequestBody ExpressOrder expressOrder) {
+        // 1. Allocate locker compartment (Simplistic logic: find first free compartment in locker)
+        // In real world, this would be complex
+        expressOrder.setStatus("待取件");
+        expressOrder.setPickupCode(String.valueOf((int)((Math.random()*900000)+100000))); // Random 6 digit
+        return Result.success(expressOrderRepository.save(expressOrder));
+    }
+
+    @PutMapping("/{trackingNo}/pickup")
+    public Result<Void> pickup(@PathVariable String trackingNo) {
+        ExpressOrder order = expressOrderRepository.findById(trackingNo).orElse(null);
+        if(order != null && "待取件".equals(order.getStatus())) {
+            order.setStatus("已取件");
+            order.setOutTime(java.time.LocalDateTime.now());
+            expressOrderRepository.save(order);
+            return Result.success();
+        }
+        return Result.error("订单不存在或状态不正确");
+    }
 }

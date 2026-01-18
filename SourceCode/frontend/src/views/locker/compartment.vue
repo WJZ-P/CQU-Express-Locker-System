@@ -10,7 +10,7 @@
       <!-- 选择快递柜 -->
       <el-form :inline="true" class="search-form">
         <el-form-item label="选择快递柜">
-          <el-select v-model="selectedLocker" placeholder="请选择快递柜" @change="handleLockerChange">
+          <el-select v-model="selectedLocker" placeholder="请选择快递柜" @change="handleLockerChange" style="width: 250px">
             <el-option
               v-for="locker in lockerList"
               :key="locker.id"
@@ -75,19 +75,31 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { getLockerList, getCompartmentList, updateCompartment, openCompartment } from '@/api/locker'
 
 const selectedLocker = ref('')
 const dialogVisible = ref(false)
-
-const lockerList = ref([
-  { id: 'L001', location: '重庆大学A区1号门' },
-  { id: 'L002', location: '重庆大学A区2号门' },
-  { id: 'L003', location: '重庆大学B区食堂' }
-])
-
+const lockerList = ref([])
 const compartmentList = ref([])
+
+onMounted(async () => {
+  try {
+    const res = await getLockerList({ page: 1, pageSize: 100 })
+    lockerList.value = res.data.list
+  } catch(e) { console.error(e) }
+})
+
+const handleLockerChange = async (val) => {
+  try {
+    const res = await getCompartmentList(val)
+    compartmentList.value = res.data.map(c => ({
+      ...c,
+      hasItem: c.status === '占用'
+    }))
+  } catch(e) { console.error(e) }
+}
 
 const currentComp = reactive({
   id: '',
@@ -98,30 +110,18 @@ const currentComp = reactive({
   temperature: 0
 })
 
-const handleLockerChange = () => {
-  // 模拟获取仓门数据
-  compartmentList.value = [
-    { id: 'C01', size: '小', status: '正常', hasItem: true, pressure: 1.2, temperature: 25 },
-    { id: 'C02', size: '小', status: '正常', hasItem: false, pressure: 0, temperature: 25 },
-    { id: 'C03', size: '中', status: '正常', hasItem: true, pressure: 3.5, temperature: 24 },
-    { id: 'C04', size: '中', status: '故障', hasItem: false, pressure: 0, temperature: 0 },
-    { id: 'C05', size: '大', status: '正常', hasItem: true, pressure: 5.8, temperature: 25 },
-    { id: 'C06', size: '大', status: '禁用', hasItem: false, pressure: 0, temperature: 0 },
-    { id: 'C07', size: '小', status: '正常', hasItem: false, pressure: 0, temperature: 26 },
-    { id: 'C08', size: '中', status: '正常', hasItem: true, pressure: 2.1, temperature: 25 }
-  ]
-}
-
 const getStatusType = (status) => {
-  const map = { '正常': 'success', '故障': 'danger', '禁用': 'info' }
+  const map = { '空闲': 'success', '占用': 'warning', '故障': 'danger', '禁用': 'info' }
   return map[status] || 'info'
 }
 
 const getCompartmentClass = (comp) => {
   return {
-    'has-item': comp.hasItem,
-    'is-fault': comp.status === '故障',
-    'is-disabled': comp.status === '禁用'
+    'is-active': currentComp.id === comp.id,
+    'comp-free': comp.status === '空闲',
+    'comp-used': comp.status === '占用',
+    'comp-error': comp.status === '故障',
+    'comp-disabled': comp.status === '禁用'
   }
 }
 
@@ -130,17 +130,21 @@ const handleCompartmentClick = (comp) => {
   dialogVisible.value = true
 }
 
-const handleOpenDoor = () => {
-  ElMessageBox.confirm('确定要远程打开该仓门吗？', '提示', { type: 'warning' }).then(() => {
-    ElMessage.success('仓门已打开')
-    dialogVisible.value = false
-  })
+const handleOpenDoor = async () => {
+  try {
+    await openCompartment(currentComp.id)
+    ElMessage.success('开门指令已发送')
+  } catch(e) { console.error(e) }
 }
 
-const handleToggleStatus = () => {
-  const action = currentComp.status === '禁用' ? '启用' : '禁用'
-  currentComp.status = currentComp.status === '禁用' ? '正常' : '禁用'
-  ElMessage.success(`${action}成功`)
+const handleToggleStatus = async () => {
+    const newStatus = currentComp.status === '禁用' ? '空闲' : '禁用'
+    try {
+        await updateCompartment(currentComp.id, { ...currentComp, status: newStatus })
+        ElMessage.success('状态更新成功')
+        dialogVisible.value = false
+        handleLockerChange(selectedLocker.value) // refresh
+    } catch(e) { console.error(e) }
 }
 </script>
 

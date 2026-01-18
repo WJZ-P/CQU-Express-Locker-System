@@ -30,8 +30,9 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { getSystemConfig, updateSystemConfig } from '@/api/system'
 
 const configForm = reactive({
   systemName: '快递柜综合应用系统',
@@ -42,8 +43,21 @@ const configForm = reactive({
   faceRecognition: false
 })
 
-const handleSave = () => {
-  ElMessage.success('配置保存成功')
+onMounted(async () => {
+  try {
+    const res = await getSystemConfig()
+    Object.assign(configForm, res.data)
+  } catch(e) { console.error(e) }
+})
+
+const handleSave = async () => {
+  try {
+    await updateSystemConfig(configForm)
+    ElMessage.success('配置保存成功')
+  } catch(e) {
+    ElMessage.error('保存失败')
+    console.error(e)
+  }
 }
 </script>
 

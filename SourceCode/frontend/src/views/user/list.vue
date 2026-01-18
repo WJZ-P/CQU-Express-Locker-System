@@ -56,13 +56,31 @@
         class="pagination"
       />
     </el-card>
+
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
+        <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+            <el-form-item label="用户名" prop="username">
+                <el-input v-model="form.username" :disabled="isEdit" />
+            </el-form-item>
+            <el-form-item label="姓名" prop="name">
+                <el-input v-model="form.name" />
+            </el-form-item>
+            <el-form-item label="手机号" prop="phone">
+                <el-input v-model="form.phone" />
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <el-button @click="dialogVisible = false">取消</el-button>
+            <el-button type="primary" @click="handleSubmit">确定</el-button>
+        </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getUserList, deleteUser, toggleUserStatus } from '@/api/user'
+import { getUserList, addUser, updateUser, deleteUser, toggleUserStatus } from '@/api/user'
 
 const searchForm = reactive({ phone: '', name: '' })
 const pagination = reactive({ current: 1, pageSize: 10, total: 0 })
@@ -88,8 +106,37 @@ const handleSearch = () => {
     pagination.current = 1
     loadData()
 }
-const handleAdd = () => ElMessage.info('请在后端添加用户逻辑，此处尚未完全实现弹窗')
-const handleEdit = (row) => ElMessage.info(`编辑用户 ${row.name}`)
+const handleAdd = () => {
+    isEdit.value = false
+    dialogTitle.value = '新增用户'
+    Object.assign(form, { id: '', username: '', name: '', phone: '', status: '正常' })
+    dialogVisible.value = true
+}
+
+const handleEdit = (row) => {
+    isEdit.value = true
+    dialogTitle.value = '编辑用户'
+    Object.assign(form, row)
+    dialogVisible.value = true
+}
+
+const handleSubmit = async () => {
+    const valid = await formRef.value.validate().catch(() => false)
+    if(!valid) return
+    try {
+        if(isEdit.value) {
+            await updateUser(form.id, form)
+            ElMessage.success('更新成功')
+        } else {
+            form.password = '123456' // Default
+            await addUser(form)
+            ElMessage.success('添加成功')
+        }
+        dialogVisible.value = false
+        loadData()
+    } catch(e) { console.error(e) }
+}
+
 const handleToggle = (row) => {
   const newStatus = row.status === '正常' ? '禁用' : '正常'
   ElMessageBox.confirm(`确定要${newStatus}该用户吗?`).then(async () => {

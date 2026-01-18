@@ -20,7 +20,7 @@
           <el-input v-model="searchForm.location" placeholder="请输入位置" clearable />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
+          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable style="width: 200px">
             <el-option label="正常" value="正常" />
             <el-option label="故障" value="故障" />
             <el-option label="禁用" value="禁用" />
@@ -100,9 +100,11 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getLockerList, addLocker, updateLocker, deleteLocker, toggleLockerStatus } from '@/api/locker'
 
+const router = useRouter()
 const loading = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
@@ -193,7 +195,7 @@ const handleEdit = (row) => {
 }
 
 const handleView = (row) => {
-  ElMessage.info(`查看快递柜 ${row.id} 详情`)
+  router.push({ path: '/locker/compartment', query: { lockerId: row.id } })
 }
 
 const handleToggleStatus = (row) => {
