@@ -58,8 +58,9 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { getExpressList } from '@/api/express'
 
 const searchForm = reactive({
   trackingNo: '',
@@ -70,22 +71,44 @@ const searchForm = reactive({
 const pagination = reactive({
   current: 1,
   pageSize: 10,
-  total: 100
+  total: 0
 })
 
-const tableData = ref([
-  { trackingNo: 'SF1234567890', courier: '张三', receiver: '李明', phone: '138****1234', locker: 'L001', compartment: 'C01', pickupCode: '123456', inTime: '2026-01-18 10:30', status: '待取件' },
-  { trackingNo: 'YT9876543210', courier: '李四', receiver: '王芳', phone: '139****5678', locker: 'L001', compartment: 'C03', pickupCode: '654321', inTime: '2026-01-18 09:15', status: '已取件' },
-  { trackingNo: 'ZT1122334455', courier: '张三', receiver: '刘伟', phone: '137****9012', locker: 'L002', compartment: 'C05', pickupCode: '112233', inTime: '2026-01-17 14:20', status: '已超时' }
-])
+const tableData = ref([])
+
+const loadData = async () => {
+  try {
+    const res = await getExpressList({
+      page: pagination.current,
+      pageSize: pagination.pageSize,
+      ...searchForm
+    })
+    tableData.value = res.data.list
+    pagination.total = res.data.total
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+onMounted(() => {
+  loadData()
+})
 
 const getStatusType = (status) => {
   const map = { '待取件': 'warning', '已取件': 'success', '已超时': 'danger' }
   return map[status] || 'info'
 }
 
-const handleSearch = () => ElMessage.success('查询成功')
-const handleReset = () => Object.assign(searchForm, { trackingNo: '', phone: '', status: '' })
+const handleSearch = () => {
+  pagination.current = 1
+  loadData()
+}
+
+const handleReset = () => {
+  Object.assign(searchForm, { trackingNo: '', phone: '', status: '' })
+  loadData()
+}
+
 const handleView = (row) => ElMessage.info(`查看快递 ${row.trackingNo}`)
 </script>
 

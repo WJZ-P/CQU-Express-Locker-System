@@ -103,69 +103,94 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import * as echarts from 'echarts'
+import { getDashboardStats, getExpressTrend, getUsageRate } from '@/api/statistics'
+import { getLockerList } from '@/api/locker'
 
 const lineChartRef = ref()
 const pieChartRef = ref()
 
 const stats = reactive({
-  lockerCount: 128,
-  expressCount: 1256,
-  userCount: 8964,
-  courierCount: 156
+  lockerCount: 0,
+  expressCount: 0,
+  userCount: 0,
+  courierCount: 0
 })
 
-const lockerList = ref([
-  { id: 'L001', location: '重庆大学A区1号门', totalCompartments: 8, usedCompartments: 5, electricity: 2.3, status: '正常' },
-  { id: 'L002', location: '重庆大学A区2号门', totalCompartments: 8, usedCompartments: 8, electricity: 2.8, status: '正常' },
-  { id: 'L003', location: '重庆大学B区食堂', totalCompartments: 6, usedCompartments: 3, electricity: 1.9, status: '正常' },
-  { id: 'L004', location: '重庆大学C区图书馆', totalCompartments: 8, usedCompartments: 6, electricity: 2.5, status: '正常' },
-  { id: 'L005', location: '重庆大学D区宿舍', totalCompartments: 8, usedCompartments: 0, electricity: 0, status: '故障' }
-])
+const lockerList = ref([])
 
-onMounted(() => {
-  initLineChart()
-  initPieChart()
+onMounted(async () => {
+   await loadData()
+   initLineChart()
+   initPieChart()
 })
 
-const initLineChart = () => {
+const loadData = async () => {
+    // 1. Dashboard Stats
+    try {
+        const statsRes = await getDashboardStats()
+        if(statsRes.data) {
+           Object.assign(stats, statsRes.data)
+        }
+    } catch(e) { console.error(e) }
+
+    // 2. Locker List for table
+    try {
+        const lockerRes = await getLockerList({ page: 1, pageSize: 5 })
+        lockerList.value = lockerRes.data.list
+    } catch(e) { console.error(e) }
+}
+
+
+const initLineChart = async () => {
   const chart = echarts.init(lineChartRef.value)
+  let seriesData = {
+      dates: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+      values: [120, 132, 101, 134, 90, 230, 210] // Fallback
+  }
+  
+  try {
+      const res = await getExpressTrend()
+      if(res.data && res.data.dates) {
+          seriesData = res.data
+      }
+  } catch(e) { console.error(e) }
+
   chart.setOption({
     tooltip: { trigger: 'axis' },
-    legend: { data: ['入柜', '取件', '寄存'] },
+    legend: { data: ['快递量'] },
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+      data: seriesData.dates
     },
     yAxis: { type: 'value' },
     series: [
-      { name: '入柜', type: 'line', smooth: true, data: [120, 132, 101, 134, 90, 230, 210] },
-      { name: '取件', type: 'line', smooth: true, data: [110, 125, 95, 128, 85, 220, 200] },
-      { name: '寄存', type: 'line', smooth: true, data: [20, 32, 18, 24, 15, 45, 38] }
+      { name: '快递量', type: 'line', smooth: true, data: seriesData.values }
     ]
   })
 }
 
-const initPieChart = () => {
-  const chart = echarts.init(pieChartRef.value)
-  chart.setOption({
+const initPieChart = async () => {
+    const chart = echarts.init(pieChartRef.value)
+    let data = [
+        { value: 60, name: '已用' },
+        { value: 40, name: '空闲' }
+    ]
+    try {
+        const res = await getUsageRate()
+        if(res.data) data = res.data
+    } catch(e) {}
+
+    chart.setOption({
     tooltip: { trigger: 'item' },
-    legend: { bottom: '5%', left: 'center' },
-    series: [{
-      name: '使用率',
-      type: 'pie',
-      radius: ['40%', '70%'],
-      avoidLabelOverlap: false,
-      itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
-      label: { show: false },
-      emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } },
-      labelLine: { show: false },
-      data: [
-        { value: 68, name: '已使用' },
-        { value: 32, name: '空闲' }
-      ]
-    }]
+    series: [
+      {
+        type: 'pie',
+        radius: ['50%', '70%'],
+        data: data
+      }
+    ]
   })
 }
 </script>

@@ -99,8 +99,9 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { getLockerList, addLocker, updateLocker, deleteLocker, toggleLockerStatus } from '@/api/locker'
 
 const loading = ref(false)
 const dialogVisible = ref(false)
@@ -116,16 +117,31 @@ const searchForm = reactive({
 const pagination = reactive({
   current: 1,
   pageSize: 10,
-  total: 100
+  total: 0
 })
 
-const tableData = ref([
-  { id: 'L001', location: '重庆大学A区1号门', compartmentCount: 8, electricity: 2.3, temperature: 25, humidity: 60, status: '正常' },
-  { id: 'L002', location: '重庆大学A区2号门', compartmentCount: 8, electricity: 2.8, temperature: 26, humidity: 58, status: '正常' },
-  { id: 'L003', location: '重庆大学B区食堂', compartmentCount: 6, electricity: 1.9, temperature: 24, humidity: 62, status: '正常' },
-  { id: 'L004', location: '重庆大学C区图书馆', compartmentCount: 8, electricity: 2.5, temperature: 23, humidity: 55, status: '故障' },
-  { id: 'L005', location: '重庆大学D区宿舍', compartmentCount: 8, electricity: 0, temperature: 0, humidity: 0, status: '禁用' }
-])
+const tableData = ref([])
+
+const loadData = async () => {
+  loading.value = true
+  try {
+    const res = await getLockerList({
+      page: pagination.current,
+      pageSize: pagination.pageSize,
+      ...searchForm
+    })
+    tableData.value = res.data.list.map(l => ({...l, electricity: (Math.random()*5).toFixed(1)}))
+    pagination.total = res.data.total
+  } catch (err) {
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  loadData()
+})
 
 const form = reactive({
   id: '',
@@ -148,13 +164,15 @@ const getStatusType = (status) => {
 }
 
 const handleSearch = () => {
-  ElMessage.success('查询成功')
+  pagination.current = 1
+  loadData()
 }
 
 const handleReset = () => {
   searchForm.id = ''
   searchForm.location = ''
   searchForm.status = ''
+  loadData()
 }
 
 const handleAdd = () => {
@@ -180,31 +198,53 @@ const handleView = (row) => {
 
 const handleToggleStatus = (row) => {
   const action = row.status === '禁用' ? '启用' : '禁用'
+  const newStatus = row.status === '禁用' ? '正常' : '禁用'
   ElMessageBox.confirm(`确定要${action}快递柜 ${row.id} 吗？`, '提示', {
     type: 'warning'
-  }).then(() => {
-    row.status = row.status === '禁用' ? '正常' : '禁用'
+  }).then(async () => {
+    await toggleLockerStatus(row.id, {status: newStatus})
     ElMessage.success(`${action}成功`)
+    loadData()
   })
 }
 
 const handleDelete = (row) => {
   ElMessageBox.confirm(`确定要删除快递柜 ${row.id} 吗？`, '提示', {
     type: 'warning'
-  }).then(() => {
+  }).then(async () => {
+    await deleteLocker(row.id)
     ElMessage.success('删除成功')
+    loadData()
   })
 }
 
 const handleSubmit = async () => {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
-  ElMessage.success(isEdit.value ? '编辑成功' : '新增成功')
-  dialogVisible.value = false
+  
+  try {
+    if (isEdit.value) {
+      await updateLocker(form.id, form)
+      ElMessage.success('编辑成功')
+    } else {
+      await addLocker(form)
+      ElMessage.success('新增成功')
+    }
+    dialogVisible.value = false
+    loadData()
+  } catch(e) {
+    console.error(e)
+  }
 }
 
-const handleSizeChange = () => {}
-const handleCurrentChange = () => {}
+const handleSizeChange = (val) => {
+    pagination.pageSize = val
+    loadData()
+}
+const handleCurrentChange = (val) => {
+    pagination.current = val
+    loadData()
+}
 </script>
 
 <style lang="scss" scoped>

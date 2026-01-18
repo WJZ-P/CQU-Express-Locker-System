@@ -46,6 +46,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { login } from '@/api/auth'
 
 const router = useRouter()
 const formRef = ref()
@@ -66,13 +67,21 @@ const handleLogin = async () => {
   if (!valid) return
 
   loading.value = true
-  // 模拟登录
-  setTimeout(() => {
-    localStorage.setItem('token', 'mock-token')
-    ElMessage.success('登录成功')
-    router.push('/')
+  try {
+    const res = await login(form)
+    if (res.code === 200) {
+        localStorage.setItem('token', res.data.token)
+        localStorage.setItem('userInfo', JSON.stringify(res.data.userInfo))
+        ElMessage.success('登录成功')
+        router.push('/')
+    } else {
+        ElMessage.error(res.message || '登录失败')
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
     loading.value = false
-  }, 1000)
+  }
 }
 </script>
 

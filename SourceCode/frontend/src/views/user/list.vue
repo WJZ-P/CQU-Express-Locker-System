@@ -60,27 +60,50 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { getUserList, deleteUser, toggleUserStatus } from '@/api/user'
 
 const searchForm = reactive({ phone: '', name: '' })
-const pagination = reactive({ current: 1, pageSize: 10, total: 100 })
+const pagination = reactive({ current: 1, pageSize: 10, total: 0 })
+const tableData = ref([])
 
-const tableData = ref([
-  { id: 1, name: '李明', phone: '13812341234', email: 'liming@qq.com', faceRegistered: true, createTime: '2025-12-01 10:00', status: '正常' },
-  { id: 2, name: '王芳', phone: '13956785678', email: 'wangfang@163.com', faceRegistered: false, createTime: '2025-12-05 14:30', status: '正常' },
-  { id: 3, name: '刘伟', phone: '13790129012', email: 'liuwei@gmail.com', faceRegistered: true, createTime: '2025-12-10 09:15', status: '禁用' }
-])
+onMounted(() => loadData())
 
-const handleSearch = () => ElMessage.success('查询成功')
-const handleAdd = () => ElMessage.info('打开新增用户弹窗')
+const loadData = async () => {
+    try {
+        const res = await getUserList({
+            page: pagination.current,
+            pageSize: pagination.pageSize,
+            ...searchForm
+        })
+        tableData.value = res.data.list
+        pagination.total = res.data.total
+    } catch(e) {
+        console.error(e)
+    }
+}
+
+const handleSearch = () => {
+    pagination.current = 1
+    loadData()
+}
+const handleAdd = () => ElMessage.info('请在后端添加用户逻辑，此处尚未完全实现弹窗')
 const handleEdit = (row) => ElMessage.info(`编辑用户 ${row.name}`)
 const handleToggle = (row) => {
-  row.status = row.status === '正常' ? '禁用' : '正常'
-  ElMessage.success('操作成功')
+  const newStatus = row.status === '正常' ? '禁用' : '正常'
+  ElMessageBox.confirm(`确定要${newStatus}该用户吗?`).then(async () => {
+      await toggleUserStatus(row.id, {status: newStatus})
+      ElMessage.success('操作成功')
+      loadData()
+  })
 }
 const handleDelete = (row) => {
-  ElMessageBox.confirm(`确定删除用户 ${row.name}？`).then(() => ElMessage.success('删除成功'))
+  ElMessageBox.confirm(`确定删除用户 ${row.name}？`).then(async () => {
+      await deleteUser(row.id)
+      ElMessage.success('删除成功')
+      loadData()
+  })
 }
 </script>
 
