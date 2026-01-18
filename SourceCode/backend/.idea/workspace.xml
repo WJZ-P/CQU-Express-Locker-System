@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="313e9730-5bc8-450f-840d-fa1629f565be" name="更改" comment="">
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/LockerApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/LockerApplication.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/config/MybatisPlusConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/config/MybatisPlusConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/AuthController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/AuthController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/ExpressController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/ExpressController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/LockerController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/LockerController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/StatisticsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/StatisticsController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/SystemController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/SystemController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/UserController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/UserController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/BusOrder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/BusOrder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/IotBox.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/IotBox.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/IotLocker.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/IotLocker.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysCourier.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysCourier.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysUser.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysUser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/mapper/BusOrderMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/mapper/BusOrderMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/mapper/IotBoxMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/mapper/IotBoxMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/mapper/IotLockerMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/mapper/IotLockerMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/mapper/SysConfigMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/mapper/SysConfigMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/mapper/SysCourierMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/mapper/SysCourierMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/mapper/SysUserMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/mapper/SysUserMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/BusOrderService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/BusOrderService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/IotBoxService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/IotBoxService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/IotLockerService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/IotLockerService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/SysConfigService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/SysConfigService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/SysCourierService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/SysCourierService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/SysUserService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/SysUserService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/BusOrderServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/BusOrderServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/IotBoxServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/IotBoxServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/IotLockerServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/IotLockerServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/SysConfigServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/SysConfigServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/SysCourierServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/SysCourierServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/SysUserServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/SysUserServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/utils/Result.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/utils/Result.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/package-lock.json" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="38Qes2TJKwCNKxHpUdBKER5oiu6" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "git-widget-placeholder": "feature/1.0.0/zsc",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/63167/Desktop/github/CQU-Express-Locker-System/SourceCode/backend",
+    "project.structure.last.edited": "SDK",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "vue.rearranger.settings.migration": "true",
+    "应用程序.LockerApplication.executor": "Run"
+  }
+}]]></component>
+  <component name="RunManager" selected="应用程序.LockerApplication">
+    <configuration name="LockerApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.cqu.locker.LockerApplication" />
+      <module name="locker-system" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.cqu.locker.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="LockerApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="locker-system" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.cqu.locker.LockerApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="应用程序.LockerApplication" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-26cb7f24e5b0-intellij.indexing.shared.core-IU-253.29346.240" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.29346.240" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="313e9730-5bc8-450f-840d-fa1629f565be" name="更改" comment="" />
+      <created>1768736425301</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1768736425301</updated>
+      <workItem from="1768736427103" duration="1645000" />
+      <workItem from="1768741753536" duration="122000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

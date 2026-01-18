@@ -17,7 +17,7 @@
       >
         <template v-for="route in menuRoutes" :key="route.path">
           <!-- 无子菜单 -->
-          <el-menu-item v-if="!route.children || route.children.length === 0" :index="route.path">
+          <el-menu-item v-if="!route.children || route.children.length === 0" :index="`/${route.path}`">
             <el-icon><component :is="route.meta.icon" /></el-icon>
             <template #title>{{ route.meta.title }}</template>
           </el-menu-item>
@@ -30,7 +30,7 @@
             <el-menu-item
               v-for="child in route.children"
               :key="child.path"
-              :index="`${route.path}/${child.path}`"
+              :index="`/${route.path}/${child.path}`"
             >
               {{ child.meta.title }}
             </el-menu-item>
