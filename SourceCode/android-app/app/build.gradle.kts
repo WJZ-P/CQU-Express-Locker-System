@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "me.wjz.cqu_express_locker"
+    namespace = "me.wjz.cquexpresslocker"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "me.wjz.cqu_express_locker"
+        applicationId = "me.wjz.cquexpresslocker"
         minSdk = 30
         targetSdk = 36
         versionCode = 1
