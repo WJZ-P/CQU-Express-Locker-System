@@ -34,7 +34,7 @@ fun LoginScreen(
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.height(48.dp))
         
         // Logo
         Text(
@@ -45,7 +45,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "快递柜系统",
+            text = "重庆大学快递柜系统",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold
         )

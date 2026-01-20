@@ -30,11 +30,18 @@ fun SplashScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        Text(
+            text = "重大智柜",
+            fontSize = 48.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+
         // Logo placeholder
         Box(
             modifier = Modifier
                 .size(120.dp)
-                .padding(bottom = 24.dp),
+                .padding(24.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -42,16 +49,6 @@ fun SplashScreen(
                 fontSize = 64.sp
             )
         }
-        
-        Text(
-            text = "快递柜",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
         Text(
             text = "智能快递，便捷生活",
             fontSize = 16.sp,
