@@ -22,7 +22,14 @@
             <template #title>{{ route.meta.title }}</template>
           </el-menu-item>
           <!-- 有子菜单 -->
+
+
+
+
+
           <el-sub-menu v-else :index="route.path">
+         <!-- <el-sub-menu v-else :index="`/${route.path}`"> -->
+
             <template #title>
               <el-icon><component :is="route.meta.icon" /></el-icon>
               <span>{{ route.meta.title }}</span>
