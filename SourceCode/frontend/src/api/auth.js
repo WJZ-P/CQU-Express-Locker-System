@@ -14,3 +14,13 @@ export function logout() {
 export function getUserInfo() {
   return request.get('/auth/userinfo')
 }
+
+// 发送验证码
+export function sendCode(data) {
+  return request.post('/auth/send-code', data)
+}
+
+// 注册
+export function register(data) {
+  return request.post('/auth/register', data)
+}

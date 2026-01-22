@@ -5,9 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="313e9730-5bc8-450f-840d-fa1629f565be" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/controller/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/utils/Result.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/utils/Result.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -86,7 +84,7 @@
       <updated>1768736425301</updated>
       <workItem from="1768736427103" duration="1645000" />
       <workItem from="1768741753536" duration="122000" />
-      <workItem from="1769052811707" duration="557000" />
+      <workItem from="1769052811707" duration="1538000" />
     </task>
     <servers />
   </component>
