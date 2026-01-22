@@ -13,13 +13,53 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-val userName = "WJZ"
-val numOfPackages = 6
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserHomeScreen(
+    onNavigateToExpressDetail: (String) -> Unit,
+    onNavigateToSendExpress: () -> Unit,
+    viewModel: UserHomeViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    when (val state = uiState) {
+        is UserHomeUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        is UserHomeUiState.Error -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("加载失败: ${state.message}")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { viewModel.refresh() }) {
+                        Text("重试")
+                    }
+                }
+            }
+        }
+        is UserHomeUiState.Success -> {
+            UserHomeContent(
+                data = state.data,
+                onNavigateToExpressDetail = onNavigateToExpressDetail,
+                onNavigateToSendExpress = onNavigateToSendExpress
+            )
+        }
+    }
+}
+
+@Composable
+private fun UserHomeContent(
+    data: UserHomeData,
     onNavigateToExpressDetail: (String) -> Unit,
     onNavigateToSendExpress: () -> Unit
 ) {
@@ -44,12 +84,12 @@ fun UserHomeScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "用户${userName}，你好！",
+                            text = "用户${data.userName}，你好！",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "今天有 $numOfPackages 个快递待取",
+                            text = "今天有 ${data.numOfPackages} 个快递待取",
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                         )
                     }
@@ -116,10 +156,7 @@ fun UserHomeScreen(
         }
         
         // 快递列表
-        items(listOf(
-            ExpressItem("SF1234567890", "顺丰速运", "L001-C03", "123456", "2小时前"),
-            ExpressItem("YT9876543210", "圆通速递", "L002-C05", "654321", "5小时前")
-        )) { item ->
+        items(data.pendingExpressList) { item ->
             ExpressCard(
                 item = item,
                 onClick = { onNavigateToExpressDetail(item.trackingNo) }
@@ -144,35 +181,38 @@ fun UserHomeScreen(
             }
         }
         
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+        // 寄存物品卡片
+        data.recentStorage?.let { storage ->
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(
-                        Icons.Default.Archive,
-                        contentDescription = null,
-                        modifier = Modifier.size(40.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text("寄存物品", fontWeight = FontWeight.Medium)
-                        Text(
-                            "L001-C02 | 取件码: 998877",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 14.sp
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Archive,
+                            contentDescription = null,
+                            modifier = Modifier.size(40.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("寄存物品", fontWeight = FontWeight.Medium)
+                            Text(
+                                "${storage.location} | 取件码: ${storage.pickupCode}",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 14.sp
+                            )
+                        }
+                        AssistChip(
+                            onClick = { },
+                            label = { Text(storage.status) }
                         )
                     }
-                    AssistChip(
-                        onClick = { },
-                        label = { Text("寄存中") }
-                    )
                 }
             }
         }
