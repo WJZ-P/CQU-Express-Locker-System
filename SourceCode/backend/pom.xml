@@ -52,6 +52,8 @@
             <version>5.8.25</version>
         </dependency>
         
+        <!-- JWT (Hutool includes JWT support) -->
+        
         <!-- Validation -->
          <dependency>
             <groupId>org.springframework.boot</groupId>

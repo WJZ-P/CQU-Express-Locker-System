@@ -1,75 +1,64 @@
 package com.cqu.locker.controller;
 
-import com.cqu.locker.entity.SysUser;
-import com.cqu.locker.service.SysUserService;
+import com.cqu.locker.entity.dto.*;
+import com.cqu.locker.service.AuthService;
 import com.cqu.locker.utils.Result;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * 认证控制器
  */
+@Slf4j
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @CrossOrigin
 public class AuthController {
-
+    
     @Autowired
-    private SysUserService userService;
-
-    // 简单模拟 Token 存储 (实际生产环境应使用 Redis + JWT)
-    private static final Map<String, SysUser> tokenMap = new HashMap<>();
-
+    private AuthService authService;
+    
     /**
      * 用户登录
      */
     @PostMapping("/login")
-    public Result<Map<String, String>> login(@RequestBody Map<String, String> params) {
-        String username = params.get("username");
-        String password = params.get("password");
-        
-        SysUser user = userService.login(username, password);
-        if (user == null) {
-            return Result.error("用户名或密码错误");
+    public Result<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        try {
+            LoginResponse response = authService.login(request);
+            return Result.success(response);
+        } catch (Exception e) {
+            log.error("登录失败", e);
+            return Result.error(401, e.getMessage());
         }
-        
-        String token = UUID.randomUUID().toString();
-        tokenMap.put(token, user);
-        
-        Map<String, String> data = new HashMap<>();
-        data.put("token", token);
-        return Result.success(data);
     }
     
     /**
-     * 获取用户信息
+     * 发送验证码
      */
-    @GetMapping("/userinfo")
-    public Result<SysUser> getUserInfo(@RequestHeader(value = "Authorization", required = false) String token) {
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
+    @PostMapping("/send-code")
+    public Result<Void> sendCode(@Valid @RequestBody SendCodeRequest request) {
+        try {
+            authService.sendCode(request);
+            return Result.success();
+        } catch (Exception e) {
+            log.error("发送验证码失败", e);
+            return Result.error(e.getMessage());
         }
-        
-        SysUser user = tokenMap.get(token);
-        if (user == null) {
-            return Result.error(401, "未登录或Token过期");
-        }
-        return Result.success(user);
     }
     
     /**
-     * 退出登录
+     * 用户注册
      */
-    @PostMapping("/logout")
-    public Result<Void> logout(@RequestHeader(value = "Authorization", required = false) String token) {
-         if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
+    @PostMapping("/register")
+    public Result<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
+        try {
+            RegisterResponse response = authService.register(request);
+            return Result.success(response);
+        } catch (Exception e) {
+            log.error("注册失败", e);
+            return Result.error(e.getMessage());
         }
-        tokenMap.remove(token);
-        return Result.success();
     }
 }

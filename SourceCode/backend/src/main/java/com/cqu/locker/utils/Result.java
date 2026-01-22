@@ -1,5 +1,6 @@
 package com.cqu.locker.utils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
@@ -16,6 +17,7 @@ public class Result<T> {
     /**
      * 提示信息
      */
+    @JsonProperty("message")
     private String msg;   
     
     /**
@@ -30,7 +32,7 @@ public class Result<T> {
     public static <T> Result<T> success(T data) {
         Result<T> r = new Result<>();
         r.code = 200;
-        r.msg = "操作成功";
+        r.msg = "success";
         r.data = data;
         return r;
     }
