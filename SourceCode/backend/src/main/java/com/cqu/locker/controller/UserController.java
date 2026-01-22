@@ -69,7 +69,7 @@ public class UserController {
     /**
      * 用户列表
      */
-    @GetMapping("/api/user/list")
+    @GetMapping("/api/v1/user/list")
     public Result<Page<SysUser>> userList(@RequestParam(defaultValue = "1") Integer current, 
                                           @RequestParam(defaultValue = "10") Integer size) {
         Page<SysUser> page = new Page<>(current, size);
@@ -79,7 +79,7 @@ public class UserController {
     /**
      * 用户详情
      */
-    @GetMapping("/api/user/{id}")
+    @GetMapping("/api/v1/user/{id}")
     public Result<SysUser> getUserById(@PathVariable Long id) {
         return Result.success(userService.getById(id));
     }
@@ -89,7 +89,7 @@ public class UserController {
     /**
      * 快递员列表
      */
-    @GetMapping("/api/courier/list")
+    @GetMapping("/api/v1/courier/list")
     public Result<Page<SysCourier>> courierList(@RequestParam(defaultValue = "1") Integer current, 
                                                 @RequestParam(defaultValue = "10") Integer size) {
         Page<SysCourier> page = new Page<>(current, size);
@@ -99,7 +99,7 @@ public class UserController {
     /**
      * 快递员详情
      */
-    @GetMapping("/api/courier/{id}")
+    @GetMapping("/api/v1/courier/{id}")
     public Result<SysCourier> getCourierById(@PathVariable Long id) {
         return Result.success(courierService.getById(id));
     }

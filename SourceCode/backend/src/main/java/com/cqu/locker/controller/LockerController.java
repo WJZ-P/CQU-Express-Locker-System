@@ -15,7 +15,7 @@ import java.util.List;
  * 提供快递柜的增删改查及状态控制接口
  */
 @RestController
-@RequestMapping("/api/locker")
+@RequestMapping("/api/v1/locker")
 @CrossOrigin // 允许跨域请求，方便前端开发
 public class LockerController {
 

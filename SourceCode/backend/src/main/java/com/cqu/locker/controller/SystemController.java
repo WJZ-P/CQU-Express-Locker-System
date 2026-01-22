@@ -13,7 +13,7 @@ import java.util.List;
  * 系统配置控制器
  */
 @RestController
-@RequestMapping("/api/system")
+@RequestMapping("/api/v1/system")
 @CrossOrigin
 public class SystemController {
 

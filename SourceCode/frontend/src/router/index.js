@@ -107,7 +107,7 @@ const router = createRouter({
   routes
 })
 
-路由守卫
+// 路由守卫
 router.beforeEach((to, from, next) => {
   document.title = `${to.meta.title} - 快递柜管理系统`
   const token = localStorage.getItem('token')

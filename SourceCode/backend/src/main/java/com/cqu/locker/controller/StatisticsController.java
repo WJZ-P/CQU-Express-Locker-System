@@ -13,7 +13,7 @@ import java.util.Map;
  * 统计分析控制器 (Mock数据)
  */
 @RestController
-@RequestMapping("/api/statistics")
+@RequestMapping("/api/v1/statistics")
 @CrossOrigin
 public class StatisticsController {
 
