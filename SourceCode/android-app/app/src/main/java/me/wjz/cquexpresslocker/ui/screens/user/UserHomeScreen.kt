@@ -14,6 +14,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+val userName = "WJZ"
+val numOfPackages = 6
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserHomeScreen(
@@ -41,12 +44,12 @@ fun UserHomeScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Hi，用户",
+                            text = "用户${userName}，你好！",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "今天有 2 个快递待取",
+                            text = "今天有 $numOfPackages 个快递待取",
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                         )
                     }
