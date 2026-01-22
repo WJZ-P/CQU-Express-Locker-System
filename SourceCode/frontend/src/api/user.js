@@ -1,5 +1,15 @@
 import request from '@/utils/request'
 
+// V1 API - 获取用户信息
+export function getUserProfile() {
+  return request.get('/user/profile')
+}
+
+// V1 API - 更新用户信息
+export function updateUserProfile(data) {
+  return request.put('/user/profile', data)
+}
+
 // 获取用户列表
 export function getUserList(params) {
   return request.get('/user/list', { params })

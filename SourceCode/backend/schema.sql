@@ -109,5 +109,6 @@ CREATE TABLE `iot_power_stats` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='电量统计表';
 
 -- 初始数据
-INSERT INTO `sys_user` (`username`, `password`, `phone`, `role`) VALUES ('admin', '123456', '13800138000', 0);
+-- 管理员账号：手机号 13800138000，密码 123456（已MD5加密）
+INSERT INTO `sys_user` (`username`, `password`, `phone`, `role`) VALUES ('admin', 'e10adc3949ba59abbe56e057f20f883e', '13800138000', 0);
 INSERT INTO `sys_config` (`param_key`, `param_value`, `description`) VALUES ('sys_name', '快递柜综合应用系统', '系统名称'), ('pickup_timeout', '24', '取件超时时间(h)');

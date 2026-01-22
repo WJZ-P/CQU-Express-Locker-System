@@ -1,0 +1,48 @@
+package com.cqu.locker.config;
+
+import com.cqu.locker.utils.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
+
+/**
+ * JWT拦截器
+ */
+@Slf4j
+@Component
+public class JwtInterceptor implements HandlerInterceptor {
+    
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        // 跨域预检请求直接放行
+        if ("OPTIONS".equals(request.getMethod())) {
+            return true;
+        }
+        
+        String token = request.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        
+        if (token == null || token.isEmpty()) {
+            response.setStatus(401);
+            return false;
+        }
+        
+        // 验证token
+        if (!JwtUtil.verify(token)) {
+            response.setStatus(401);
+            return false;
+        }
+        
+        // 将用户ID和类型存入request属性
+        Long userId = JwtUtil.getUserId(token);
+        String userType = JwtUtil.getUserType(token);
+        request.setAttribute("userId", userId);
+        request.setAttribute("userType", userType);
+        
+        return true;
+    }
+}
