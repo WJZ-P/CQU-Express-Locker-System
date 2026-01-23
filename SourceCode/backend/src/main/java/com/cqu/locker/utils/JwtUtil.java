@@ -21,7 +21,7 @@ public class JwtUtil {
     /**
      * 过期时间：7天（毫秒）
      */
-    private static final long EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000;
+    public static long EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000;
     
     /**
      * 生成token
@@ -59,10 +59,14 @@ public class JwtUtil {
     public static Long getUserId(String token) {
         JWT jwt = JWTUtil.parseToken(token);
         Object userId = jwt.getPayload("userId");
-        if (userId instanceof Integer) {
-            return ((Integer) userId).longValue();
+        
+        // 使用更健壮的方式获取userId
+        String userIdStr = String.valueOf(userId);
+        try {
+            return Long.parseLong(userIdStr);
+        } catch (NumberFormatException e) {
+            return null;
         }
-        return (Long) userId;
     }
     
     /**
