@@ -13,12 +13,16 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import me.wjz.cquexpresslocker.viewmodels.auth.RegisterViewModel
+import me.wjz.cquexpresslocker.viewmodels.auth.SendCodeState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     onNavigateBack: () -> Unit,
-    onRegisterSuccess: () -> Unit
+    onRegisterSuccess: () -> Unit,
+    viewModel: RegisterViewModel = viewModel()
 ) {
     var phone by remember { mutableStateOf("") }
     var verifyCode by remember { mutableStateOf("") }
@@ -28,6 +32,22 @@ fun RegisterScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var isUserMode by remember { mutableStateOf(true) }
     var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+    
+    val sendCodeState by viewModel.sendCodeState.collectAsState()
+    val remainingTime by viewModel.remainingTime.collectAsState()
+    
+    LaunchedEffect(sendCodeState) {
+        when (val state = sendCodeState) {
+            is SendCodeState.Error -> {
+                errorMessage = state.message
+            }
+            is SendCodeState.Success -> {
+                errorMessage = state.message
+            }
+            else -> {}
+        }
+    }
     
     Scaffold(
         topBar = {
@@ -115,11 +135,31 @@ fun RegisterScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 OutlinedButton(
-                    onClick = { /* TODO: 发送验证码 */ },
-                    modifier = Modifier.height(56.dp)
+                    onClick = { viewModel.sendCode(phone) },
+                    modifier = Modifier.height(56.dp),
+                    enabled = phone.isNotEmpty() && remainingTime == 0 && sendCodeState !is SendCodeState.Loading
                 ) {
-                    Text("获取验证码")
+                    if (sendCodeState is SendCodeState.Loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else if (remainingTime > 0) {
+                        Text("${remainingTime}s")
+                    } else {
+                        Text("获取验证码")
+                    }
                 }
+            }
+            
+            if (errorMessage.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = errorMessage,
+                    color = if (sendCodeState is SendCodeState.Error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.fillMaxWidth(),
+                    fontSize = 12.sp
+                )
             }
             
             Spacer(modifier = Modifier.height(16.dp))
