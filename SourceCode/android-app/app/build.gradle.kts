@@ -19,6 +19,13 @@ android {
     }
 
     buildTypes {
+        //  定义一下后端接口的baseURL，模拟器不能用127.0.0.1
+        getByName("debug"){
+            buildConfigField("String","BASE_URL","\"http://10.0.2.2:6666/api/v1/\"")
+        }
+        getByName("release"){
+            buildConfigField("String","BASE_URL","\"暂时留空，不知道学校校园网的局域网地址是啥\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -36,6 +43,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

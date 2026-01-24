@@ -1,5 +1,6 @@
 package me.wjz.cquexpresslocker.network
 
+import android.R.attr.data
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -8,6 +9,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 import java.util.concurrent.TimeUnit
+
+const val BASE_URL = "http://localhost:6666/api/v1/"
 
 /**
  * 通用响应结构
@@ -23,9 +26,7 @@ data class ApiResponse<T>(
  */
 data class RegisterRequest(
     val phone: String,
-    val password: String,
-    val verifyCode: String,
-    val userType: String
+    val type : Unit
 )
 
 /**
@@ -38,14 +39,13 @@ data class RegisterData(
 interface ApiService {
 
     /**
-     * 用户注册
+     * 用户注册，或者重置密码
      */
-    @POST("auth/register")
+    @POST("auth/send-code")
     suspend fun register(@Body request: RegisterRequest): ApiResponse<RegisterData>
 }
 
 object ApiClient {
-    private const val BASE_URL = "http://localhost:6666/api/v1/"
 
     private val gson = GsonBuilder().create()
 
