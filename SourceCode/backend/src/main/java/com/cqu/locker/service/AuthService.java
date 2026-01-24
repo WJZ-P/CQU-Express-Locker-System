@@ -26,4 +26,11 @@ public interface AuthService {
      * @return 注册响应
      */
     RegisterResponse register(RegisterRequest request);
+    
+    /**
+     * Token校验与刷新
+     * @param request Token校验请求
+     * @return Token校验响应
+     */
+    VerifyTokenResponse verifyToken(VerifyTokenRequest request);
 }

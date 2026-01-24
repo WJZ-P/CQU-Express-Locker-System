@@ -156,4 +156,38 @@ public class AuthServiceImpl implements AuthService {
                 .userId(user.getId().toString())
                 .build();
     }
+
+    @Override
+    public VerifyTokenResponse verifyToken(VerifyTokenRequest request) {
+        // 验证token
+        boolean valid = JwtUtil.verify(request.getToken());
+        
+        if (valid) {
+            // 解析token获取用户信息
+            Long userId = JwtUtil.getUserId(request.getToken());
+            String userType = JwtUtil.getUserType(request.getToken());
+            
+            // 如果无法获取用户信息，视为无效token
+            if (userId == null || userType == null) {
+                return VerifyTokenResponse.builder()
+                        .valid(false)
+                        .build();
+            }
+            
+            // 生成新token
+            String newToken = JwtUtil.generateToken(userId, userType);
+            
+            return VerifyTokenResponse.builder()
+                    .valid(true)
+                    .token(newToken)
+                    .expiresIn(7 * 24 * 60 * 60) // 7天，单位：秒
+                    .userId(userId.toString())
+                    .userType(userType)
+                    .build();
+        } else {
+            return VerifyTokenResponse.builder()
+                    .valid(false)
+                    .build();
+        }
+    }
 }
