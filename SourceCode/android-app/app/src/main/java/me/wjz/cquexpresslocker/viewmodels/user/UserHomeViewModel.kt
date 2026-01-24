@@ -1,4 +1,4 @@
-package me.wjz.cquexpresslocker.ui.screens.user
+package me.wjz.cquexpresslocker.viewmodels.user
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import me.wjz.cquexpresslocker.ui.screens.user.ExpressItem
 
 /**
  * UserHomeScreen 的 ViewModel
