@@ -66,7 +66,10 @@ fun AppNavGraph(
         }
         
         // 用户主页（含底部导航）
-        composable(AppRoutes.USER_MAIN) {
+        composable(AppRoutes.USER_MAIN) { backStackEntry ->
+            // 监听来自 EditProfileScreen 的刷新信号
+            val refreshProfile = backStackEntry.savedStateHandle.get<Boolean>("refresh") == true
+            
             UserMainScreen(
                 onNavigateToExpressDetail = { expressId ->
                     navController.navigate("user_express_detail/$expressId")
@@ -80,6 +83,9 @@ fun AppNavGraph(
                 onNavigateToHistory = {
                     navController.navigate(AppRoutes.USER_HISTORY)
                 },
+                onNavigateToEditProfile = { nickname ->
+                    navController.navigate("user_edit_profile/$nickname")
+                },
                 onLogout = {
                     navController.navigate(AppRoutes.LOGIN) {
                         popUpTo(AppRoutes.USER_MAIN) { inclusive = true }
@@ -89,6 +95,10 @@ fun AppNavGraph(
                     navController.navigate(AppRoutes.LOGIN) {
                         popUpTo(AppRoutes.USER_MAIN) { inclusive = true }
                     }
+                },
+                shouldRefreshProfile = refreshProfile,
+                onProfileRefreshed = {
+                    backStackEntry.savedStateHandle.set("refresh", false)
                 }
             )
         }
@@ -132,6 +142,19 @@ fun AppNavGraph(
         composable(AppRoutes.USER_HISTORY) {
             HistoryScreen(
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        
+        // 用户编辑资料
+        composable(AppRoutes.USER_EDIT_PROFILE) { backStackEntry ->
+            val nickname = backStackEntry.arguments?.getString("nickname") ?: ""
+            EditProfileScreen(
+                currentNickname = nickname,
+                onNavigateBack = { navController.popBackStack() },
+                onUpdateSuccess = { 
+                    navController.previousBackStackEntry?.savedStateHandle?.set("refresh", true)
+                    navController.popBackStack()
+                }
             )
         }
         

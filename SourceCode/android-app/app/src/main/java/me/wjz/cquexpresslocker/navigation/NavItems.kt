@@ -48,6 +48,7 @@ object AppRoutes {
     const val USER_EXPRESS_DETAIL = "user_express_detail/{expressId}"
     const val USER_SEND_EXPRESS = "user_send_express"
     const val USER_HISTORY = "user_history"
+    const val USER_EDIT_PROFILE = "user_edit_profile/{nickname}"
     
     // 快递员端
     const val COURIER_MAIN = "courier_main"
