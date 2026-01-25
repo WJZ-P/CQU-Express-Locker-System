@@ -15,18 +15,36 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import me.wjz.cquexpresslocker.viewmodels.auth.LoginViewModel
+import me.wjz.cquexpresslocker.viewmodels.auth.LoginUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     onNavigateToRegister: () -> Unit,
-    onLoginSuccess: (isUser: Boolean) -> Unit
+    onLoginSuccess: (isUser: Boolean) -> Unit,
+    viewModel: LoginViewModel = viewModel()
 ) {
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isUserMode by remember { mutableStateOf(true) } // true: 用户, false: 快递员
-    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+    
+    val loginState by viewModel.loginState.collectAsState()
+    
+    LaunchedEffect(loginState) {
+        when (val state = loginState) {
+            is LoginUiState.Success -> {
+                onLoginSuccess(state.isUser)
+            }
+            is LoginUiState.Error -> {
+                errorMessage = state.message
+            }
+            else -> {}
+        }
+    }
     
     Column(
         modifier = Modifier
@@ -113,19 +131,30 @@ fun LoginScreen(
         
         Spacer(modifier = Modifier.height(32.dp))
         
+        // 错误提示
+        if (errorMessage.isNotEmpty()) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+        }
+        
         // 登录按钮
         Button(
             onClick = {
-                isLoading = true
-                // TODO: 实际登录逻辑
-                onLoginSuccess(isUserMode)
+                errorMessage = ""
+                viewModel.login(phone, password, if (isUserMode) "user" else "courier")
             },
-            enabled = phone.isNotEmpty() && password.isNotEmpty() && !isLoading,
+            enabled = phone.isNotEmpty() && password.isNotEmpty() && loginState !is LoginUiState.Loading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
         ) {
-            if (isLoading) {
+            if (loginState is LoginUiState.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp),
                     color = MaterialTheme.colorScheme.onPrimary

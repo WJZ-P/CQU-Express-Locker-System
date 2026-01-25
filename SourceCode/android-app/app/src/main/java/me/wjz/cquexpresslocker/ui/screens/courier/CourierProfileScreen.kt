@@ -12,12 +12,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
+import me.wjz.cquexpresslocker.utils.TokenManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CourierProfileScreen(
     onLogout: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+    
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -166,7 +170,12 @@ fun CourierProfileScreen(
         // 退出登录
         item {
             OutlinedButton(
-                onClick = onLogout,
+                onClick = {
+                    scope.launch {
+                        TokenManager.clearAll()
+                        onLogout()
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),

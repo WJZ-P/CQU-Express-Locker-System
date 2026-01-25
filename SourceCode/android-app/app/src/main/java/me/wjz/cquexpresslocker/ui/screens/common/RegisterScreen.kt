@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import me.wjz.cquexpresslocker.viewmodels.auth.RegisterState
 import me.wjz.cquexpresslocker.viewmodels.auth.RegisterViewModel
 import me.wjz.cquexpresslocker.viewmodels.auth.SendCodeState
 
@@ -36,8 +37,9 @@ fun RegisterScreen(
     
     val sendCodeState by viewModel.sendCodeState.collectAsState()
     val remainingTime by viewModel.remainingTime.collectAsState()
+    val registerState by viewModel.registerState.collectAsState()
     
-    LaunchedEffect(sendCodeState) {
+    LaunchedEffect(sendCodeState,registerState) {
         when (val state = sendCodeState) {
             is SendCodeState.Error -> {
                 errorMessage = state.message
@@ -46,6 +48,15 @@ fun RegisterScreen(
                 errorMessage = state.message
             }
             else -> {}
+        }
+        when(val state = registerState){
+            is RegisterState.Success -> {
+                onRegisterSuccess()
+            }
+            is RegisterState.Error -> {
+                errorMessage = state.message
+            }
+            else ->{}
         }
     }
     
@@ -206,8 +217,7 @@ fun RegisterScreen(
             Button(
                 onClick = {
                     isLoading = true
-                    // TODO: 实际注册逻辑
-                    onRegisterSuccess()
+                    viewModel.register(phone, verifyCode, password, if (isUserMode) "user" else "courier")
                 },
                 enabled = name.isNotEmpty() && phone.isNotEmpty() && 
                          password.isNotEmpty() && password == confirmPassword && !isLoading,

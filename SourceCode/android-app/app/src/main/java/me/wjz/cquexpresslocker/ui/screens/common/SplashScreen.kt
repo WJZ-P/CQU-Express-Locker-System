@@ -5,24 +5,44 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
+import androidx.lifecycle.viewmodel.compose.viewModel
+import me.wjz.cquexpresslocker.viewmodels.SplashViewModel
+import me.wjz.cquexpresslocker.viewmodels.SplashUiState
 
 @Composable
 fun SplashScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToUserMain: () -> Unit,
-    onNavigateToCourierMain: () -> Unit
+    onNavigateToCourierMain: () -> Unit,
+    viewModel: SplashViewModel = viewModel()
 ) {
-    // 模拟检查登录状态
+    val splashState by viewModel.splashState.collectAsState()
+    
+    // 检查 token 有效性
     LaunchedEffect(Unit) {
-        delay(1500)
-        // TODO: 检查本地token，判断跳转
-        onNavigateToLogin()
+        viewModel.checkTokenValidity()
+    }
+    
+    // 根据状态导航
+    LaunchedEffect(splashState) {
+        when (val state = splashState) {
+            is SplashUiState.GoToLogin -> onNavigateToLogin()
+            is SplashUiState.GoToHome -> {
+                if (state.isUser) {
+                    onNavigateToUserMain()
+                } else {
+                    onNavigateToCourierMain()
+                }
+            }
+            SplashUiState.Loading -> {} // 保持加载状态
+        }
     }
     
     Column(

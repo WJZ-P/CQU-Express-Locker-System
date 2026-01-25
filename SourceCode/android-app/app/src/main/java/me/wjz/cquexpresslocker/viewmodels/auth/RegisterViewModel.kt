@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import me.wjz.cquexpresslocker.network.ApiClient
+import me.wjz.cquexpresslocker.network.RegisterData
+import me.wjz.cquexpresslocker.network.RegisterRequest
 import me.wjz.cquexpresslocker.network.SendCodeRequest
 
 sealed class SendCodeState {
@@ -17,12 +19,23 @@ sealed class SendCodeState {
     data class Error(val message: String) : SendCodeState()
 }
 
+sealed class RegisterState {
+    object Idle : RegisterState()
+    object Loading : RegisterState()
+    data class Success(val data: RegisterData) : RegisterState()
+    data class Error(val message: String) : RegisterState()
+}
+
 class RegisterViewModel : ViewModel() {
     private val _sendCodeState = MutableStateFlow<SendCodeState>(SendCodeState.Idle)
     val sendCodeState: StateFlow<SendCodeState> = _sendCodeState.asStateFlow()
 
     private val _remainingTime = MutableStateFlow(0)
     val remainingTime: StateFlow<Int> = _remainingTime.asStateFlow()
+
+    //  注册状态流
+    private val _registerState = MutableStateFlow<RegisterState>(RegisterState.Idle)
+    val registerState = _registerState.asStateFlow()
 
     fun sendCode(phone: String) {
         // 验证手机号
@@ -51,6 +64,26 @@ class RegisterViewModel : ViewModel() {
                 }
             } catch (e: Exception) {
                 _sendCodeState.value = SendCodeState.Error(e.message ?: "网络错误")
+            }
+        }
+    }
+
+    //  实际注册账号逻辑
+    fun register(phone: String, verifyCode: String, password: String, userType: String) {
+        viewModelScope.launch {
+            try {
+                _registerState.value = RegisterState.Loading
+                val registerRequest = RegisterRequest(phone, password, verifyCode, userType)
+                val response = ApiClient.apiService.register(registerRequest)
+                if (response.code == 200) {
+                    _registerState.value = RegisterState.Success(response.data)
+                } else {
+                    _registerState.value = RegisterState.Error(response.message)
+                }
+            } catch (e: Exception) {
+                // 网络错误 (比如超时、连不上服务器)
+                e.printStackTrace()
+                _registerState.value = RegisterState.Error("注册失败: ${e.message}")
             }
         }
     }

@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 data class ApiResponse<T>(
     val code: Int,
     val message: String,
-    val data: T?
+    val data: T
 )
 
 // ===================== 认证模块 =====================
