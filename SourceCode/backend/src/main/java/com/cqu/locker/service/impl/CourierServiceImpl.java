@@ -112,7 +112,8 @@ public class CourierServiceImpl implements CourierService {
         LambdaQueryWrapper<IotBox> boxWrapper = new LambdaQueryWrapper<>();
         boxWrapper.eq(IotBox::getLockerId, lockerId)
                 .eq(IotBox::getSize, size)
-                .eq(IotBox::getStatus, 0); // 0-空闲
+                .eq(IotBox::getStatus, 0) // 0-空闲
+                .last("limit 1"); // 只取第一条
         
         IotBox box = boxMapper.selectOne(boxWrapper);
         if (box == null) {
@@ -121,7 +122,8 @@ public class CourierServiceImpl implements CourierService {
         
         // 查询收件人信息
         LambdaQueryWrapper<SysUser> userWrapper = new LambdaQueryWrapper<>();
-        userWrapper.eq(SysUser::getPhone, request.getReceiverPhone());
+        userWrapper.eq(SysUser::getPhone, request.getReceiverPhone())
+                .last("limit 1"); // 只取第一条
         SysUser user = userMapper.selectOne(userWrapper);
         if (user == null) {
             throw new RuntimeException("收件人不存在");

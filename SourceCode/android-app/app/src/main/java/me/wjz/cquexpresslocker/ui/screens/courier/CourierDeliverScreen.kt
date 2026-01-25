@@ -11,14 +11,55 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import me.wjz.cquexpresslocker.viewmodels.courier.CourierDeliverViewModel
+import me.wjz.cquexpresslocker.viewmodels.courier.ReceiverQueryState
+import me.wjz.cquexpresslocker.viewmodels.courier.DeliverState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CourierDeliverScreen() {
+fun CourierDeliverScreen(
+    viewModel: CourierDeliverViewModel = viewModel()
+) {
     var trackingNo by remember { mutableStateOf("") }
+    var receiverPhone by remember { mutableStateOf("") }
     var selectedLocker by remember { mutableStateOf<String?>(null) }
     var selectedCompartment by remember { mutableStateOf<String?>(null) }
-    var showLockerSelection by remember { mutableStateOf(false) }
+    
+    val lockers by viewModel.lockers.collectAsState()
+    val receiverQueryState by viewModel.receiverQueryState.collectAsState()
+    val deliverState by viewModel.deliverState.collectAsState()
+    
+    var showDeliverySuccess by remember { mutableStateOf(false) }
+    var deliveryResult by remember { mutableStateOf<String?>(null) }
+    
+    if (showDeliverySuccess) {
+        AlertDialog(
+            onDismissRequest = { showDeliverySuccess = false },
+            title = { Text("投递成功") },
+            text = {
+                Column {
+                    Text("快递号: ${deliveryResult?.split("|")?.getOrNull(0) ?: ""}")
+                    Text("仓门号: ${deliveryResult?.split("|")?.getOrNull(1) ?: ""}")
+                    Text("取件码: ${deliveryResult?.split("|")?.getOrNull(2) ?: ""}")
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeliverySuccess = false
+                        trackingNo = ""
+                        receiverPhone = ""
+                        selectedLocker = null
+                        selectedCompartment = null
+                        viewModel.resetDeliverState()
+                    }
+                ) {
+                    Text("确定")
+                }
+            }
+        )
+    }
     
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
@@ -44,7 +85,7 @@ fun CourierDeliverScreen() {
                                 }
                             }
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text("扫描/输入快递单号", fontWeight = FontWeight.Bold)
+                            Text("快递单号", fontWeight = FontWeight.Bold)
                         }
                         
                         Spacer(modifier = Modifier.height(16.dp))
@@ -86,9 +127,9 @@ fun CourierDeliverScreen() {
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Column {
-                                        Text("收件人: 李明", fontWeight = FontWeight.Medium)
+                                        Text("单号已识别", fontWeight = FontWeight.Medium)
                                         Text(
-                                            "手机: 138****1234",
+                                            trackingNo,
                                             fontSize = 14.sp,
                                             color = MaterialTheme.colorScheme.onSecondaryContainer
                                         )
@@ -100,7 +141,7 @@ fun CourierDeliverScreen() {
                 }
             }
             
-            // 第二步：选择快递柜
+            // 第二步：查询收件人
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -122,37 +163,136 @@ fun CourierDeliverScreen() {
                                 }
                             }
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text("选择快递柜", fontWeight = FontWeight.Bold)
+                            Text("收件人信息", fontWeight = FontWeight.Bold)
                         }
                         
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        // 快递柜列表
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            LockerSelectionItem(
-                                name = "重庆大学A区1号门",
-                                lockerId = "L001",
-                                emptySmall = 2,
-                                emptyMedium = 2,
-                                emptyLarge = 1,
-                                isSelected = selectedLocker == "L001",
-                                onSelect = { selectedLocker = "L001" }
-                            )
-                            LockerSelectionItem(
-                                name = "重庆大学A区2号门",
-                                lockerId = "L002",
-                                emptySmall = 1,
-                                emptyMedium = 1,
-                                emptyLarge = 0,
-                                isSelected = selectedLocker == "L002",
-                                onSelect = { selectedLocker = "L002" }
-                            )
+                        if (trackingNo.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                OutlinedTextField(
+                                    value = receiverPhone,
+                                    onValueChange = { receiverPhone = it },
+                                    label = { Text("收件人手机") },
+                                    modifier = Modifier.weight(1f),
+                                    singleLine = true
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Button(
+                                    onClick = { viewModel.queryReceiver(receiverPhone) },
+                                    enabled = receiverPhone.isNotEmpty() && receiverQueryState !is ReceiverQueryState.Loading
+                                ) {
+                                    Text("查询")
+                                }
+                            }
+                            
+                            when (receiverQueryState) {
+                                is ReceiverQueryState.Loading -> {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                                }
+                                is ReceiverQueryState.Success -> {
+                                    val receiver = (receiverQueryState as ReceiverQueryState.Success).receiver
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Card(
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                        )
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(12.dp)
+                                        ) {
+                                            Text("收件人: ${receiver.name}", fontWeight = FontWeight.Medium)
+                                            Text("手机: ${receiver.phone}", fontSize = 14.sp)
+                                            if (receiver.defaultLocker != null) {
+                                                Text("默认柜: ${receiver.defaultLocker.lockerName}", fontSize = 14.sp)
+                                            }
+                                        }
+                                    }
+                                }
+                                is ReceiverQueryState.Error -> {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        (receiverQueryState as ReceiverQueryState.Error).message,
+                                        color = MaterialTheme.colorScheme.error,
+                                        fontSize = 14.sp
+                                    )
+                                }
+                                else -> Unit
+                            }
                         }
                     }
                 }
             }
             
-            // 第三步：选择仓门
+            // 第三步：选择快递柜
+            item {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                shape = MaterialTheme.shapes.small,
+                                color = if (receiverPhone.isNotEmpty() && receiverQueryState is ReceiverQueryState.Success) 
+                                    MaterialTheme.colorScheme.primary 
+                                else MaterialTheme.colorScheme.surfaceVariant,
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        "3",
+                                        color = if (receiverPhone.isNotEmpty() && receiverQueryState is ReceiverQueryState.Success) 
+                                            MaterialTheme.colorScheme.onPrimary 
+                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text("选择快递柜", fontWeight = FontWeight.Bold)
+                        }
+                        
+                        if (receiverPhone.isNotEmpty() && receiverQueryState is ReceiverQueryState.Success) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                lockers.forEach { locker ->
+                                    Card(
+                                        onClick = { selectedLocker = locker.lockerId },
+                                        colors = if (selectedLocker == locker.lockerId) {
+                                            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                                        } else {
+                                            CardDefaults.cardColors()
+                                        }
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(12.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            RadioButton(
+                                                selected = selectedLocker == locker.lockerId,
+                                                onClick = { selectedLocker = locker.lockerId }
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(locker.lockerName, fontWeight = FontWeight.Medium)
+                                                Text(
+                                                    "ID: ${locker.lockerId}",
+                                                    fontSize = 12.sp,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // 第四步：选择仓门大小
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -166,7 +306,7 @@ fun CourierDeliverScreen() {
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Text(
-                                        "3",
+                                        "4",
                                         color = if (selectedLocker != null) 
                                             MaterialTheme.colorScheme.onPrimary 
                                         else MaterialTheme.colorScheme.onSurfaceVariant
@@ -184,22 +324,19 @@ fun CourierDeliverScreen() {
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 CompartmentSizeChip(
-                                    size = "小仓",
-                                    count = 2,
+                                    size = "小",
                                     isSelected = selectedCompartment == "small",
                                     onClick = { selectedCompartment = "small" },
                                     modifier = Modifier.weight(1f)
                                 )
                                 CompartmentSizeChip(
-                                    size = "中仓",
-                                    count = 2,
+                                    size = "中",
                                     isSelected = selectedCompartment == "medium",
                                     onClick = { selectedCompartment = "medium" },
                                     modifier = Modifier.weight(1f)
                                 )
                                 CompartmentSizeChip(
-                                    size = "大仓",
-                                    count = 1,
+                                    size = "大",
                                     isSelected = selectedCompartment == "large",
                                     onClick = { selectedCompartment = "large" },
                                     modifier = Modifier.weight(1f)
@@ -212,16 +349,68 @@ fun CourierDeliverScreen() {
             
             // 投递按钮
             item {
+                val receiver = if (receiverQueryState is ReceiverQueryState.Success) {
+                    (receiverQueryState as ReceiverQueryState.Success).receiver
+                } else null
+                
                 Button(
-                    onClick = { /* 投递 */ },
+                    onClick = {
+                        if (selectedLocker != null && selectedCompartment != null && receiver != null) {
+                            // 从 "L001" 提取数字部分 "1"
+                            val numericLockerId = selectedLocker!!.filter { it.isDigit() }
+                            viewModel.deliverExpress(
+                                lockerId = numericLockerId,
+                                compartmentSize = selectedCompartment!!,
+                                trackingNo = trackingNo,
+                                receiverPhone = receiverPhone,
+                                receiverName = receiver.name
+                            )
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
                     enabled = trackingNo.isNotEmpty() && selectedLocker != null && selectedCompartment != null
+                        && receiverQueryState is ReceiverQueryState.Success
+                        && deliverState !is DeliverState.Loading
                 ) {
-                    Icon(Icons.Default.LockOpen, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("开柜投递", fontSize = 16.sp)
+                    if (deliverState is DeliverState.Loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Icon(Icons.Default.LockOpen, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("开柜投递", fontSize = 16.sp)
+                    }
+                }
+            }
+            
+            // 显示投递结果
+            item {
+                when (deliverState) {
+                    is DeliverState.Success -> {
+                        val response = (deliverState as DeliverState.Success).response
+                        LaunchedEffect(deliverState) {
+                            deliveryResult = "${response.expressId}|${response.compartmentNo}|${response.pickupCode}"
+                            showDeliverySuccess = true
+                        }
+                    }
+                    is DeliverState.Error -> {
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer
+                            )
+                        ) {
+                            Text(
+                                (deliverState as DeliverState.Error).message,
+                                modifier = Modifier.padding(16.dp),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                    else -> Unit
                 }
             }
         }
@@ -229,57 +418,8 @@ fun CourierDeliverScreen() {
 }
 
 @Composable
-private fun LockerSelectionItem(
-    name: String,
-    lockerId: String,
-    emptySmall: Int,
-    emptyMedium: Int,
-    emptyLarge: Int,
-    isSelected: Boolean,
-    onSelect: () -> Unit
-) {
-    Card(
-        onClick = onSelect,
-        colors = if (isSelected) {
-            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-        } else {
-            CardDefaults.cardColors()
-        },
-        border = if (isSelected) {
-            CardDefaults.outlinedCardBorder().copy(
-                brush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary)
-            )
-        } else null
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RadioButton(selected = isSelected, onClick = onSelect)
-            Spacer(modifier = Modifier.width(8.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(name, fontWeight = FontWeight.Medium)
-                Text(
-                    "小:$emptySmall 中:$emptyMedium 大:$emptyLarge",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Text(
-                lockerId,
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
 private fun CompartmentSizeChip(
     size: String,
-    count: Int,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -291,8 +431,7 @@ private fun CompartmentSizeChip(
             CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
         } else {
             CardDefaults.cardColors()
-        },
-        enabled = count > 0
+        }
     ) {
         Column(
             modifier = Modifier
@@ -301,12 +440,6 @@ private fun CompartmentSizeChip(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(size, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal)
-            Text(
-                "${count}个空闲",
-                fontSize = 12.sp,
-                color = if (count > 0) MaterialTheme.colorScheme.primary 
-                       else MaterialTheme.colorScheme.error
-            )
         }
     }
 }

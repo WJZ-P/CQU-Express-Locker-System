@@ -1,0 +1,182 @@
+---
+description: 
+alwaysApply: false
+enabled: true
+updatedAt: 2026-01-25T12:38:38.418Z
+provider: 
+---
+
+# 快递员页面 - 现有 UI 与接口对接分析
+
+## 📋 现有页面分析
+
+### 1️⃣ **CourierHomeScreen.kt** ✅ **可直接对接**
+
+#### 硬编码数据需要替换：
+- **第33-50行**：`Hi，快递员张三` + `顺丰速运 | 工号: C001`
+  - ❌ 硬编码：名字、公司、工号
+  - ✅ **接口**: `getCourierProfile()` 返回 `CourierProfileData`
+  
+- **第76-113行**：今日统计卡片
+  - ❌ 硬编码：`已投递: 25`, `待取件: 3`, `超时件: 1`, `待揽收: 5`
+  - ✅ **接口**: 
+    - `getCourierProfile()` 返回 `todayDelivered`、`todayCollected`
+    - **需要新增后端接口**：查询超时件、待取件数量
+  
+- **第133-161行**：快递柜状态卡片
+  - ❌ 硬编码：3个快递柜列表 `L001-L003`
+  - ✅ **接口**: `getCourierProfile()` 返回 `bindLockers` 列表
+  - ❌ **缺少**：每个快递柜的实时空闲格口数（可调用 `getLockerAvailability()` for each locker）
+
+**✅ 对接方案**：需要创建 `CourierHomeViewModel`
+
+---
+
+### 2️⃣ **CourierProfileScreen.kt** ✅ **可直接对接**
+
+#### 硬编码数据需要替换：
+- **第64-77行**：快递员信息卡片
+  - ❌ 硬编码：`张三`、`顺丰速运 | 工号: C001`、`138****1111`
+  - ✅ **接口**: `getCourierProfile()` 返回所有信息
+  
+- **第100-102行**：业绩统计
+  - ❌ 硬编码：`投递总数: 856`、`揽收总数: 123`、`好评率: 99.5%`
+  - ❌ **缺少后端接口**：月度统计数据
+
+**✅ 对接方案**：需要创建 `CourierProfileViewModel`
+
+---
+
+### 3️⃣ **CourierDeliverScreen.kt** ⚠️ **需要部分改进**
+
+#### 需要实现的功能：
+
+**第一步：扫描/输入快递单号**
+- 第53-59行：`trackingNo` 输入框
+- ❌ 缺少：输入后自动查询收件人信息
+- ✅ **接口**: 需要新增后端接口 - 根据运单号查询收件人
+  - 或者：让用户输入收件人手机号，调用 `queryReceiver(phone)`
+
+**第二步：选择快递柜**
+- 第130-150行：快递柜列表
+- ❌ 硬编码：2个快递柜 `L001-L002`
+- ✅ **接口**: `getCourierProfile()` 返回 `bindLockers` 列表
+- ✅ **接口**: 实时调用 `getLockerAvailability(lockerId)` 获取各尺寸空闲数
+
+**第三步：选择仓门大小**
+- 第186-206行：大小选择
+- ❌ 硬编码：小/中/大的空闲数
+- ✅ **接口**: 动态展示 `getLockerAvailability()` 返回的数据
+
+**投递按钮**
+- 第216行：`onClick = { /* 投递 */ }`
+- ✅ **接口**: `deliverExpress()` 
+  - 返回成功响应需要显示：`expressId`、`compartmentNo`、`pickupCode`
+
+**✅ 对接方案**：
+1. 需要创建 `CourierDeliverViewModel`
+2. 需要获取快递柜和格口信息
+3. 需要调用投递接口并显示结果
+
+---
+
+### 4️⃣ **CourierPickupScreen.kt** ⚠️ **完全需要重构**
+
+#### 现有问题：
+
+**Tab 1：待揽收**
+- 第53-57行：硬编码 3 条记录
+- ❌ 硬编码的数据无法更新
+- ✅ **接口**: `getPendingCollectList()` 返回 `PendingCollectListResponse`
+- 数据结构匹配度：⭐⭐⭐⭐ (完全匹配)
+
+**Tab 2：待取件（待退回）**
+- 第74-77行：硬编码 2 条记录
+- ❌ 硬编码的数据无法更新
+- ✅ **接口**: `getPendingReturnList()` 返回 `PendingReturnListResponse`
+- 数据结构匹配度：⭐⭐⭐⭐ (完全匹配)
+
+**开柜操作**
+- 第200-205行：`Button(onClick = { /* 开柜 */ })`
+- ✅ **接口**: `openCompartmentCourier()` 
+  - 需要传递 `expressId`
+
+**✅ 对接方案**：需要创建 `CourierPickupViewModel`
+
+---
+
+### 5️⃣ **CourierScanScreen.kt** ❌ **不需要改改进**
+
+功能完整，暂不需要接口对接。后续需要集成二维码库。
+
+---
+
+## 📊 总体对接优先级
+
+| 屏幕 | 优先级 | 工作量 | ViewModel 需求 | 接口调用数 |
+|------|------|------|---------------|---------|
+| CourierHomeScreen | 🔴 高 | 中 | ✅ CourierHomeViewModel | 3 |
+| CourierDeliverScreen | 🔴 高 | 中 | ✅ CourierDeliverViewModel | 3 |
+| CourierPickupScreen | 🔴 高 | 低 | ✅ CourierPickupViewModel | 2 |
+| CourierProfileScreen | 🟡 中 | 低 | ✅ CourierProfileViewModel | 1 |
+| CourierScanScreen | 🟢 低 | - | ❌ 无需改动 | 0 |
+
+---
+
+## ✅ 立即可对接的场景
+
+### **场景 1：快递员信息展示**
+```
+页面: CourierHomeScreen + CourierProfileScreen
+接口: getCourierProfile()
+工作: 替换硬编码 (张三→姓名, 顺丰→公司, 等)
+预计: 30分钟
+```
+
+### **场景 2：待揽收和待退回列表**
+```
+页面: CourierPickupScreen
+接口: 
+  - getPendingCollectList()
+  - getPendingReturnList()
+工作: 替换硬编码数据列表
+预计: 45分钟
+```
+
+### **场景 3：投递流程（部分）**
+```
+页面: CourierDeliverScreen
+接口: 
+  - getCourierProfile() → 获取快递柜列表
+  - getLockerAvailability() → 获取格口空闲数
+  - deliverExpress() → 投递
+工作: 动态加载快递柜、格口、处理投递响应
+预计: 1小时
+```
+
+---
+
+## 🚀 推荐实现顺序
+
+1. **第 1 步**（最快）：创建 `CourierProfileViewModel` + 更新 `CourierProfileScreen`
+2. **第 2 步**（最快）：创建 `CourierPickupViewModel` + 更新 `CourierPickupScreen`
+3. **第 3 步**（中等）：创建 `CourierHomeViewModel` + 更新 `CourierHomeScreen`
+4. **第 4 步**（最复杂）：创建 `CourierDeliverViewModel` + 重构 `CourierDeliverScreen`
+
+---
+
+## 📝 需要新增的后端接口
+
+1. ❌ **月度业绩统计** - 用于 `CourierProfileScreen` 业绩统计
+2. ❌ **超时件数、待取件数** - 用于 `CourierHomeScreen` 统计卡片（当前只有 todayDelivered/Collected）
+3. ✅ **根据运单号查询收件人** - 需要在 `CourierDeliverScreen` 中集成（可选）
+
+---
+
+## 总结
+
+✅ **快递员模块大部分页面都能直接对接已有的接口！**
+
+- 3 个页面可以直接替换硬编码数据
+- 需要新建 4 个 ViewModel
+- 可能需要 2-3 个新的后端接口（补充）

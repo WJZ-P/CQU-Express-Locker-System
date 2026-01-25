@@ -1,0 +1,105 @@
+---
+description: 
+alwaysApply: false
+enabled: true
+updatedAt: 2026-01-25T12:30:25.143Z
+provider: 
+---
+
+# 快递员模块功能列表
+
+## 📋 后端支持的接口
+根据 `CourierService` 和 `UserController`，后端已支持以下接口：
+
+1. **获取快递员信息** - GET `/api/v1/courier/profile`
+   - 返回：快递员名称、公司、绑定快递柜、今日投递/揽收数量
+
+2. **投递快递** - POST `/api/v1/courier/deliver`
+   - 输入：快递柜ID、格口尺寸、收件人信息
+   - 返回：投递订单号、取件码
+
+3. **查询收件人信息** - GET `/api/v1/courier/query-receiver`
+   - 输入：收件人手机号
+   - 返回：收件人绑定的快递柜信息
+
+4. **获取待揽收列表** - GET `/api/v1/courier/pending-collect`
+   - 返回：用户寄出的快递列表（待快递员揽收）
+
+5. **获取待退回列表** - GET `/api/v1/courier/pending-return`
+   - 返回：需要退回的快递列表
+
+6. **开柜操作** - POST `/api/v1/courier/open-compartment`
+   - 输入：订单ID
+   - 操作：自动开启对应格口的门
+
+---
+
+## 🎯 客户端需要实现的模块
+
+### 1️⃣ **网络层** (`ApiService.kt`)
+- [ ] 快递员数据类：`CourierProfileData`、`DeliverRequestData`、`CollectItemData` 等
+- [ ] 快递员接口方法：
+  - `getCourierProfile()` - 获取快递员信息
+  - `deliverExpress()` - 投递快递
+  - `queryReceiver()` - 查询收件人
+  - `getPendingCollectList()` - 待揽收列表
+  - `getPendingReturnList()` - 待退回列表
+  - `openCompartmentCourier()` - 快递员开柜
+
+### 2️⃣ **首页** (`CourierHomeScreen.kt`)
+- [ ] 集成快递员真实信息（目前是硬编码）
+- [ ] 实时加载今日投递、待取件、超时件、待揽收数量
+- [ ] 显示绑定快递柜列表及实时空闲情况
+
+### 3️⃣ **投递模块** (`CourierDeliverScreen.kt`)
+- [ ] 查询收件人：输入手机号 → 获取收件人信息 + 可用快递柜
+- [ ] 选择快递柜和格口尺寸
+- [ ] 投递表单：收件人信息、物品描述等
+- [ ] 显示投递结果（订单号、取件码）
+
+### 4️⃣ **待揽收列表** (`CourierPickupScreen.kt`)
+- [ ] 加载用户寄出的待揽收快递
+- [ ] 显示列表（寄件人、物品、时间等）
+- [ ] 点击快递项打开详情
+- [ ] 揽收操作（标记为已揽收）
+
+### 5️⃣ **待退回列表**（需要新建）
+- [ ] 新建 `CourierReturnScreen.kt`
+- [ ] 加载待退回的快递列表
+- [ ] 显示退回原因、收件人信息
+- [ ] 操作：确认退回
+
+### 6️⃣ **快递员信息页面** (`CourierProfileScreen.kt`)
+- [ ] 加载快递员真实信息
+- [ ] 显示：姓名、公司、工号、绑定快递柜
+- [ ] 今日统计数据
+
+### 7️⃣ **ViewModel 层**（需要新建）
+- [ ] `CourierHomeViewModel` - 首页数据
+- [ ] `CourierDeliverViewModel` - 投递流程
+- [ ] `CourierPickupViewModel` - 待揽收数据
+- [ ] `CourierReturnViewModel` - 待退回数据
+- [ ] `CourierProfileViewModel` - 快递员信息
+
+### 8️⃣ **扫码模块** (`CourierScanScreen.kt`)
+- [ ] 集成二维码扫描
+- [ ] 识别快递单号或取件码
+- [ ] 触发相关业务流程
+
+---
+
+## 🔄 实现顺序建议
+
+1. **网络层** → 先定义所有数据类和接口
+2. **首页** → 集成基础数据加载
+3. **投递模块** → 实现核心业务流程
+4. **待揽收/待退回** → 列表展示
+5. **快递员信息** → 个人页面
+6. **扫码模块** → 辅助功能
+
+---
+
+## 📊 总计工作量
+- 新建文件：5+ 个（ViewModel + Screen）
+- 修改文件：2 个（ApiService + 现有Screen）
+- 接口数：6 个

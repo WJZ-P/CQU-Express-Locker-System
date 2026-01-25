@@ -320,6 +320,113 @@ data class HistoryListResponse(
     val list: List<HistoryItemData>
 )
 
+// ===================== 快递员模块 =====================
+
+/**
+ * 快递员信息
+ */
+data class CourierProfileData(
+    val courierId: String,
+    val name: String,
+    val phone: String,
+    val company: String,
+    val bindLockers: List<BindLockerData>,
+    val todayDelivered: Int,
+    val todayCollected: Int
+)
+
+/**
+ * 绑定的快递柜
+ */
+data class BindLockerData(
+    val lockerId: String,
+    val lockerName: String
+)
+
+/**
+ * 投递请求
+ */
+data class CourierDeliverRequest(
+    val lockerId: String,
+    val compartmentSize: String,    // small/medium/large
+    val trackingNo: String,
+    val receiverPhone: String,
+    val receiverName: String
+)
+
+/**
+ * 投递响应
+ */
+data class CourierDeliverResponse(
+    val expressId: String,
+    val compartmentNo: String,
+    val pickupCode: String
+)
+
+/**
+ * 收件人信息响应
+ */
+data class ReceiverInfoData(
+    val userId: String,
+    val name: String,
+    val phone: String,
+    val defaultLocker: DefaultLockerData
+)
+
+/**
+ * 默认快递柜信息
+ */
+data class DefaultLockerData(
+    val lockerId: String,
+    val lockerName: String
+)
+
+/**
+ * 待揽收项
+ */
+data class CollectItemData(
+    val orderId: String,
+    val senderName: String,
+    val senderPhone: String,
+    val senderAddress: String,
+    val receiverAddress: String,
+    val itemType: String,
+    val weight: String,
+    val createTime: String,
+    val remark: String
+)
+
+/**
+ * 待揽收列表响应
+ */
+data class PendingCollectListResponse(
+    val total: Int,
+    val list: List<CollectItemData>
+)
+
+/**
+ * 待退回项
+ */
+data class ReturnItemData(
+    val expressId: String,
+    val trackingNo: String,
+    val lockerName: String,
+    val compartmentNo: String,
+    val arrivalTime: String,
+    val deadline: String,
+    val overdueHours: Int,
+    val receiverName: String,
+    val receiverPhone: String
+)
+
+/**
+ * 待退回列表响应
+ */
+data class PendingReturnListResponse(
+    val total: Int,
+    val list: List<ReturnItemData>
+)
+
 interface ApiService {
 
     // ===================== 认证接口 =====================
@@ -425,6 +532,44 @@ interface ApiService {
         @Query("page") page: Int = 1,
         @Query("pageSize") pageSize: Int = 20
     ): ApiResponse<HistoryListResponse>
+
+    // ===================== 快递员接口 =====================
+
+    /**
+     * 获取快递员信息
+     */
+    @GET("courier/profile")
+    suspend fun getCourierProfile(): ApiResponse<CourierProfileData>
+
+    /**
+     * 投递快递
+     */
+    @POST("courier/deliver")
+    suspend fun deliverExpress(@Body request: CourierDeliverRequest): ApiResponse<CourierDeliverResponse>
+
+    /**
+     * 查询收件人信息
+     */
+    @GET("courier/query-receiver")
+    suspend fun queryReceiver(@Query("phone") phone: String): ApiResponse<ReceiverInfoData>
+
+    /**
+     * 获取待揽收列表
+     */
+    @GET("courier/pending-collect")
+    suspend fun getPendingCollectList(): ApiResponse<PendingCollectListResponse>
+
+    /**
+     * 获取待退回列表
+     */
+    @GET("courier/pending-return")
+    suspend fun getPendingReturnList(): ApiResponse<PendingReturnListResponse>
+
+    /**
+     * 开柜操作（快递员）
+     */
+    @POST("courier/open-compartment")
+    suspend fun openCompartmentCourier(@Body request: OpenCompartmentRequest): ApiResponse<Unit>
 
     // ===================== 旧版寄存接口 =====================
 

@@ -232,7 +232,7 @@ private fun UserHomeContent(
                         }
                         AssistChip(
                             onClick = { },
-                            label = { Text(storage.status) }
+                            label = { Text(mapStorageStatus(storage.status)) }
                         )
                     }
                 }
@@ -315,5 +315,14 @@ private fun ExpressCard(
                 fontSize = 12.sp
             )
         }
+    }
+}
+
+private fun mapStorageStatus(status: String): String {
+    return when (status) {
+        "active" -> "寄存中"
+        "completed" -> "已取件"
+        "expired" -> "已过期"
+        else -> status
     }
 }

@@ -12,12 +12,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import me.wjz.cquexpresslocker.viewmodels.courier.CourierPickupViewModel
+import me.wjz.cquexpresslocker.viewmodels.courier.CourierPickupUiState
+import me.wjz.cquexpresslocker.network.CollectItemData
+import me.wjz.cquexpresslocker.network.ReturnItemData
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CourierPickupScreen() {
+fun CourierPickupScreen(
+    viewModel: CourierPickupViewModel = viewModel()
+) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("待揽收", "待取件")
+    val uiState by viewModel.uiState.collectAsState()
     
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
@@ -25,83 +33,90 @@ fun CourierPickupScreen() {
         )
         
         // Tab切换
-        TabRow(selectedTabIndex = selectedTab) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTab == index,
-                    onClick = { selectedTab = index },
-                    text = { 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(title)
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Badge { Text(if (index == 0) "5" else "3") }
+        when (uiState) {
+            is CourierPickupUiState.Success -> {
+                val data = (uiState as CourierPickupUiState.Success)
+                TabRow(selectedTabIndex = selectedTab) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            text = { 
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(title)
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Badge { Text(if (index == 0) data.collectItems.size.toString() else data.returnItems.size.toString()) }
+                                }
+                            }
+                        )
+                    }
+                }
+                
+                when (selectedTab) {
+                    0 -> PendingCollectListContent(data.collectItems, viewModel)
+                    1 -> PendingReturnListContent(data.returnItems, viewModel)
+                }
+            }
+            is CourierPickupUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            is CourierPickupUiState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text((uiState as CourierPickupUiState.Error).message)
+                        Button(onClick = { viewModel.retry() }) {
+                            Text("重试")
                         }
                     }
-                )
+                }
             }
-        }
-        
-        when (selectedTab) {
-            0 -> PendingPickupList() // 待揽收（用户发的快递）
-            1 -> PendingCollectList() // 待取件（退回的快递）
+            else -> Unit
         }
     }
 }
 
 @Composable
-private fun PendingPickupList() {
-    val items = listOf(
-        PickupTaskItem("SEND001", "重庆大学A区1号门", "L001-C05", "张三", "138****1234", "2小时前"),
-        PickupTaskItem("SEND002", "重庆大学A区2号门", "L002-C03", "李四", "139****5678", "3小时前"),
-        PickupTaskItem("SEND003", "重庆大学B区食堂", "L003-C02", "王五", "137****9012", "5小时前")
-    )
-    
+private fun PendingCollectListContent(
+    items: List<CollectItemData>,
+    viewModel: CourierPickupViewModel
+) {
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(items) { item ->
-            PickupTaskCard(
-                item = item,
-                type = "揽收"
-            )
+            CollectTaskCard(item, viewModel)
         }
     }
 }
 
 @Composable
-private fun PendingCollectList() {
-    val items = listOf(
-        PickupTaskItem("SF1234567890", "重庆大学A区1号门", "L001-C02", "收件人拒收", "-", "1天前"),
-        PickupTaskItem("YT9876543210", "重庆大学B区食堂", "L003-C06", "超时未取", "-", "2天前")
-    )
-    
+private fun PendingReturnListContent(
+    items: List<ReturnItemData>,
+    viewModel: CourierPickupViewModel
+) {
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(items) { item ->
-            PickupTaskCard(
-                item = item,
-                type = "取回"
-            )
+            ReturnTaskCard(item, viewModel)
         }
     }
 }
 
-data class PickupTaskItem(
-    val id: String,
-    val location: String,
-    val compartment: String,
-    val sender: String,
-    val phone: String,
-    val time: String
-)
-
 @Composable
-private fun PickupTaskCard(
-    item: PickupTaskItem,
-    type: String
+private fun CollectTaskCard(
+    item: CollectItemData,
+    viewModel: CourierPickupViewModel
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -114,9 +129,9 @@ private fun PickupTaskCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(item.id, fontWeight = FontWeight.Bold)
+                Text(item.orderId, fontWeight = FontWeight.Bold)
                 Text(
-                    item.time,
+                    item.createTime,
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -133,13 +148,68 @@ private fun PickupTaskCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    item.location,
+                    item.senderAddress,
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
             Spacer(modifier = Modifier.height(4.dp))
+            
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    "${item.senderName} ${item.senderPhone}",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Button(
+                onClick = { viewModel.openCompartment(item.orderId) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.LockOpen, contentDescription = null, Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("揽收")
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReturnTaskCard(
+    item: ReturnItemData,
+    viewModel: CourierPickupViewModel
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(item.expressId, fontWeight = FontWeight.Bold)
+                Text(
+                    item.arrivalTime,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
             
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -150,33 +220,34 @@ private fun PickupTaskCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    "柜门: ${item.compartment}",
+                    "${item.lockerName} - ${item.compartmentNo}",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium
                 )
             }
             
-            if (item.phone != "-") {
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        "${item.sender} ${item.phone}",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            } else {
+            Spacer(modifier = Modifier.height(4.dp))
+            
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    "${item.receiverName} ${item.receiverPhone}",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            if (item.overdueHours > 0) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    "原因: ${item.sender}",
+                    "已逾期 ${item.overdueHours} 小时",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.error
                 )
@@ -184,26 +255,13 @@ private fun PickupTaskCard(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Button(
+                onClick = { viewModel.openCompartment(item.expressId) },
+                modifier = Modifier.fillMaxWidth()
             ) {
-                OutlinedButton(
-                    onClick = { /* 导航 */ },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.Navigation, contentDescription = null, Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("导航")
-                }
-                Button(
-                    onClick = { /* 开柜 */ },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.LockOpen, contentDescription = null, Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(type)
-                }
+                Icon(Icons.Default.LockOpen, contentDescription = null, Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("取回")
             }
         }
     }
