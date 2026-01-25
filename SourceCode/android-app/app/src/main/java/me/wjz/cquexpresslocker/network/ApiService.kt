@@ -293,6 +293,33 @@ data class LockerAvailabilityResponse(
     val largeCount: Int
 )
 
+// ===================== 历史记录模块 =====================
+
+/**
+ * 历史记录项
+ */
+data class HistoryItemData(
+    val recordId: String,
+    val type: String,              // pickup/send/storage
+    val title: String,
+    val lockerName: String,
+    val compartmentNo: String,
+    val time: String,
+    val status: String,            // pending/completed/expired
+    val company: String,
+    val trackingNo: String
+)
+
+/**
+ * 历史记录列表响应
+ */
+data class HistoryListResponse(
+    val total: Int,
+    val page: Int,
+    val pageSize: Int,
+    val list: List<HistoryItemData>
+)
+
 interface ApiService {
 
     // ===================== 认证接口 =====================
@@ -386,6 +413,18 @@ interface ApiService {
      */
     @GET("locker/availability/{lockerId}")
     suspend fun getLockerAvailability(@Path("lockerId") lockerId: String): ApiResponse<LockerAvailabilityResponse>
+
+    // ===================== 历史记录接口 =====================
+
+    /**
+     * 获取历史记录列表
+     */
+    @GET("history")
+    suspend fun getHistory(
+        @Query("type") type: String = "all",
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 20
+    ): ApiResponse<HistoryListResponse>
 
     // ===================== 旧版寄存接口 =====================
 

@@ -12,14 +12,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import me.wjz.cquexpresslocker.network.HistoryItemData
+import me.wjz.cquexpresslocker.viewmodels.user.HistoryViewModel
+import me.wjz.cquexpresslocker.viewmodels.user.HistoryUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    viewModel: HistoryViewModel = viewModel()
 ) {
-    var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("全部", "取件", "寄存", "发件")
+    val uiState by viewModel.uiState.collectAsState()
+    val selectedType by viewModel.selectedType.collectAsState()
+    val currentPage by viewModel.currentPage.collectAsState()
+    
+    val tabs = listOf("全部" to "all", "取件" to "pickup", "寄存" to "storage", "发件" to "send")
+    val selectedTabIndex = tabs.indexOfFirst { it.second == selectedType }.coerceAtLeast(0)
     
     Scaffold(
         topBar = {
@@ -39,44 +48,110 @@ fun HistoryScreen(
                 .padding(padding)
         ) {
             // Tab切换
-            ScrollableTabRow(selectedTabIndex = selectedTab) {
-                tabs.forEachIndexed { index, title ->
+            ScrollableTabRow(selectedTabIndex = selectedTabIndex) {
+                tabs.forEachIndexed { index, (title, type) ->
                     Tab(
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
+                        selected = selectedTabIndex == index,
+                        onClick = { viewModel.changeTab(type) },
                         text = { Text(title) }
                     )
                 }
             }
             
-            // 历史记录列表
-            LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(listOf(
-                    HistoryItem("SF1234567890", "顺丰速运", "取件", "2026-01-18 14:30", "已完成"),
-                    HistoryItem("S001", "寄存物品", "寄存", "2026-01-17 11:00", "已取出"),
-                    HistoryItem("YT9876543210", "圆通速递", "取件", "2026-01-16 09:20", "已完成"),
-                    HistoryItem("SEND001", "发往北京", "发件", "2026-01-15 16:45", "已揽收")
-                )) { item ->
-                    HistoryCard(item)
+            // 内容区域
+            when (val state = uiState) {
+                is HistoryUiState.Initial, is HistoryUiState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                
+                is HistoryUiState.Empty -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                Icons.Default.Inbox,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .padding(bottom = 16.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                "暂无历史记录",
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+                
+                is HistoryUiState.Success -> {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(state.items) { item ->
+                                HistoryCard(item)
+                            }
+                        }
+                        
+                        // 分页控制
+                        PaginationBar(
+                            currentPage = state.currentPage,
+                            total = state.total,
+                            pageSize = state.pageSize,
+                            onPreviousClick = { viewModel.loadPreviousPage() },
+                            onNextClick = { viewModel.loadNextPage() }
+                        )
+                    }
+                }
+                
+                is HistoryUiState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                Icons.Default.ErrorOutline,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .padding(bottom = 16.dp),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Text(
+                                state.message,
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Button(
+                                onClick = { viewModel.refresh() },
+                                modifier = Modifier.padding(top = 16.dp)
+                            ) {
+                                Text("重试")
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-data class HistoryItem(
-    val id: String,
-    val title: String,
-    val type: String,
-    val time: String,
-    val status: String
-)
-
 @Composable
-private fun HistoryCard(item: HistoryItem) {
+private fun HistoryCard(item: HistoryItemData) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -88,8 +163,8 @@ private fun HistoryCard(item: HistoryItem) {
             Surface(
                 shape = MaterialTheme.shapes.small,
                 color = when (item.type) {
-                    "取件" -> MaterialTheme.colorScheme.primaryContainer
-                    "寄存" -> MaterialTheme.colorScheme.secondaryContainer
+                    "pickup" -> MaterialTheme.colorScheme.primaryContainer
+                    "storage" -> MaterialTheme.colorScheme.secondaryContainer
                     else -> MaterialTheme.colorScheme.tertiaryContainer
                 },
                 modifier = Modifier.size(48.dp)
@@ -97,14 +172,14 @@ private fun HistoryCard(item: HistoryItem) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         when (item.type) {
-                            "取件" -> Icons.Default.Inventory
-                            "寄存" -> Icons.Default.Archive
+                            "pickup" -> Icons.Default.Inventory
+                            "storage" -> Icons.Default.Archive
                             else -> Icons.Default.Send
                         },
                         contentDescription = null,
                         tint = when (item.type) {
-                            "取件" -> MaterialTheme.colorScheme.primary
-                            "寄存" -> MaterialTheme.colorScheme.secondary
+                            "pickup" -> MaterialTheme.colorScheme.primary
+                            "storage" -> MaterialTheme.colorScheme.secondary
                             else -> MaterialTheme.colorScheme.tertiary
                         }
                     )
@@ -116,7 +191,12 @@ private fun HistoryCard(item: HistoryItem) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.title, fontWeight = FontWeight.Medium)
                 Text(
-                    item.id,
+                    "单号: ${item.trackingNo}",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    "柜: ${item.lockerName} / ${item.compartmentNo}",
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -129,8 +209,63 @@ private fun HistoryCard(item: HistoryItem) {
             
             AssistChip(
                 onClick = { },
-                label = { Text(item.status, fontSize = 12.sp) }
+                label = { 
+                    Text(
+                        when (item.status) {
+                            "pending" -> "待处理"
+                            "completed" -> "已完成"
+                            "expired" -> "已过期"
+                            else -> item.status
+                        },
+                        fontSize = 12.sp
+                    )
+                }
             )
         }
     }
 }
+
+@Composable
+private fun PaginationBar(
+    currentPage: Int,
+    total: Int,
+    pageSize: Int,
+    onPreviousClick: () -> Unit,
+    onNextClick: () -> Unit
+) {
+    val totalPages = (total + pageSize - 1) / pageSize
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Button(
+            onClick = onPreviousClick,
+            enabled = currentPage > 1,
+            modifier = Modifier.weight(1f)
+        ) {
+            Text("上一页")
+        }
+        
+        Text(
+            "第 $currentPage / $totalPages 页",
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 12.dp),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            fontSize = 14.sp
+        )
+        
+        Button(
+            onClick = onNextClick,
+            enabled = currentPage < totalPages,
+            modifier = Modifier.weight(1f)
+        ) {
+            Text("下一页")
+        }
+    }
+}
+
