@@ -96,7 +96,12 @@ fun AppNavGraph(
         // 用户发快递
         composable(AppRoutes.USER_SEND_EXPRESS) {
             SendExpressScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onSendExpressSuccess = { orderId ->
+                    navController.navigate(AppRoutes.USER_MAIN) {
+                        popUpTo(AppRoutes.USER_SEND_EXPRESS) { inclusive = true }
+                    }
+                }
             )
         }
         

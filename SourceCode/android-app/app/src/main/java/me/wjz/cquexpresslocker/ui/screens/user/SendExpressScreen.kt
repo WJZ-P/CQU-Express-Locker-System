@@ -6,17 +6,24 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import me.wjz.cquexpresslocker.viewmodels.user.SendExpressUiState
+import me.wjz.cquexpresslocker.viewmodels.user.SendExpressViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SendExpressScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onSendExpressSuccess: (orderId: String) -> Unit = {},
+    viewModel: SendExpressViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     var senderName by remember { mutableStateOf("张三") }
     var senderPhone by remember { mutableStateOf("13812341234") }
     var senderAddress by remember { mutableStateOf("") }
@@ -24,6 +31,18 @@ fun SendExpressScreen(
     var receiverPhone by remember { mutableStateOf("") }
     var receiverAddress by remember { mutableStateOf("") }
     var itemDescription by remember { mutableStateOf("") }
+    var selectedCompany by remember { mutableStateOf("顺丰快递") }
+    var showCompanyMenu by remember { mutableStateOf(false) }
+    
+    val companies = listOf("顺丰快递", "圆通快递", "中通快递", "申通快递", "京东快递")
+    
+    // 监听提交成功状态
+    LaunchedEffect(uiState) {
+        if (uiState is SendExpressUiState.Success) {
+            val orderId = (uiState as SendExpressUiState.Success).data.orderId
+            onSendExpressSuccess(orderId)
+        }
+    }
     
     Scaffold(
         topBar = {
@@ -37,13 +56,100 @@ fun SendExpressScreen(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+        if (uiState is SendExpressUiState.Loading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("提交寄件信息中...", fontSize = 16.sp)
+                }
+            }
+        } else if (uiState is SendExpressUiState.Error) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = (uiState as SendExpressUiState.Error).message,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { viewModel.resetState() }) {
+                        Text("返回")
+                    }
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // 快递公司选择
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.LocalShipping,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("快递公司", fontWeight = FontWeight.Bold)
+                        }
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        ExposedDropdownMenuBox(
+                            expanded = showCompanyMenu,
+                            onExpandedChange = { showCompanyMenu = it }
+                        ) {
+                            OutlinedTextField(
+                                value = selectedCompany,
+                                onValueChange = {},
+                                label = { Text("选择快递公司") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor(),
+                                readOnly = true,
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = showCompanyMenu) }
+                            )
+                            ExposedDropdownMenu(
+                                expanded = showCompanyMenu,
+                                onDismissRequest = { showCompanyMenu = false }
+                            ) {
+                                companies.forEach { company ->
+                                    DropdownMenuItem(
+                                        text = { Text(company) },
+                                        onClick = {
+                                            selectedCompany = company
+                                            showCompanyMenu = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             // 寄件人信息
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -151,7 +257,18 @@ fun SendExpressScreen(
             
             // 提交按钮
             Button(
-                onClick = { /* 提交寄件 */ },
+                onClick = {
+                    viewModel.sendExpress(
+                        company = selectedCompany,
+                        senderName = senderName,
+                        senderPhone = senderPhone,
+                        senderAddress = senderAddress,
+                        receiverName = receiverName,
+                        receiverPhone = receiverPhone,
+                        receiverAddress = receiverAddress,
+                        remark = itemDescription
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -159,7 +276,8 @@ fun SendExpressScreen(
                          receiverName.isNotEmpty() && receiverPhone.isNotEmpty() &&
                          receiverAddress.isNotEmpty()
             ) {
-                Text("下一步：选择快递柜", fontSize = 16.sp)
+                Text("提交寄件", fontSize = 16.sp)
+            }
             }
         }
     }
