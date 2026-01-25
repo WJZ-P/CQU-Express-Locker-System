@@ -86,10 +86,12 @@ public class ExpressServiceImpl implements ExpressService {
     
     @Override
     public ExpressDetailResponse getExpressDetail(String expressId, Long userId) {
-        // 查询订单
+        // 查询订单：支持订单号或追踪号查询
         LambdaQueryWrapper<BusOrder> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(BusOrder::getOrderNo, expressId)
-               .eq(BusOrder::getUserId, userId);
+        wrapper.eq(BusOrder::getUserId, userId)
+               .and(w -> w.eq(BusOrder::getOrderNo, expressId)
+                         .or()
+                         .eq(BusOrder::getTrackingNo, expressId));
         BusOrder order = orderMapper.selectOne(wrapper);
         
         if (order == null) {
@@ -138,10 +140,12 @@ public class ExpressServiceImpl implements ExpressService {
     @Override
     @Transactional
     public PickupResponse pickup(PickupRequest request, Long userId) {
-        // 查询订单
+        // 查询订单：支持订单号或追踪号查询
         LambdaQueryWrapper<BusOrder> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(BusOrder::getOrderNo, request.getExpressId())
-               .eq(BusOrder::getUserId, userId);
+        wrapper.eq(BusOrder::getUserId, userId)
+               .and(w -> w.eq(BusOrder::getOrderNo, request.getExpressId())
+                         .or()
+                         .eq(BusOrder::getTrackingNo, request.getExpressId()));
         BusOrder order = orderMapper.selectOne(wrapper);
         
         if (order == null) {
@@ -189,10 +193,12 @@ public class ExpressServiceImpl implements ExpressService {
     
     @Override
     public void openCompartment(OpenCompartmentRequest request, Long userId) {
-        // 查询订单
+        // 查询订单：支持订单号或追踪号查询
         LambdaQueryWrapper<BusOrder> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(BusOrder::getOrderNo, request.getExpressId())
-               .eq(BusOrder::getUserId, userId);
+        wrapper.eq(BusOrder::getUserId, userId)
+               .and(w -> w.eq(BusOrder::getOrderNo, request.getExpressId())
+                         .or()
+                         .eq(BusOrder::getTrackingNo, request.getExpressId()));
         BusOrder order = orderMapper.selectOne(wrapper);
         
         if (order == null) {
