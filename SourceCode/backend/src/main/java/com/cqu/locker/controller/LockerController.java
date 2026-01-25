@@ -15,7 +15,7 @@ import java.util.List;
  * 提供快递柜的增删改查及状态控制接口
  */
 @RestController
-@RequestMapping("/api/v1/locker")
+@RequestMapping
 @CrossOrigin // 允许跨域请求，方便前端开发
 public class LockerController {
 
@@ -29,7 +29,7 @@ public class LockerController {
      * 获取所有快递柜列表
      * @return 快递柜列表数据
      */
-    @GetMapping("/list")
+    @GetMapping("/api/v1/locker/list")
     public Result<List<IotLocker>> list() {
         return Result.success(lockerService.list());
     }
@@ -39,7 +39,7 @@ public class LockerController {
      * @param id 快递柜ID
      * @return 快递柜详细信息
      */
-    @GetMapping("/{id}")
+    @GetMapping("/api/v1/locker/{id}")
     public Result<IotLocker> getById(@PathVariable Long id) {
         return Result.success(lockerService.getById(id));
     }

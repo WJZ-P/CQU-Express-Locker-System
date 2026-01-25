@@ -72,7 +72,7 @@ public class ExpressServiceImpl implements ExpressService {
             ExpressPendingResponse.ExpressItem item = ExpressPendingResponse.ExpressItem.builder()
                     .expressId(order.getOrderNo())
                     .trackingNo(order.getTrackingNo())
-                    .company(mapCompany(order.getTrackingNo()))
+                    .company("快递公司") // 数据库中没有该字段，使用默认值
                     .lockerName(locker.getLocation())
                     .compartmentNo(box.getBoxNo())
                     .status("pending")
@@ -124,7 +124,7 @@ public class ExpressServiceImpl implements ExpressService {
         return ExpressDetailResponse.builder()
                 .expressId(order.getOrderNo())
                 .trackingNo(order.getTrackingNo())
-                .company(mapCompany(order.getTrackingNo()))
+                .company("快递公司") // 默认值
                 .lockerName(locker.getLocation())
                 .lockerAddress(locker.getLocation())
                 .compartmentNo(box.getBoxNo())

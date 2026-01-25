@@ -30,15 +30,15 @@ class StorageControllerTest {
     private ObjectMapper objectMapper;
 
     /**
-     * 测试1：使用有效token创建寄存订单
+     * 测试1：使用有效token创建寄存订单（小尺寸格口）
      * @throws Exception
      */
     @Test
-    void testCreateStorageWithValidToken() throws Exception {
+    void testCreateStorageWithSmallSize() throws Exception {
         // 生成有效token
         String validToken = JwtUtil.generateToken(2L, "user");
         
-        // 构造请求体
+        // 构造请求体 - 使用小尺寸格口
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("lockerId", "1");
         requestBody.put("compartmentSize", "small");
@@ -54,11 +54,123 @@ class StorageControllerTest {
         // 验证响应 - 只检查HTTP状态码为200，不检查响应内容，因为可能出现"该尺寸的空闲格口已用完"的情况
         result.andExpect(status().isOk());
         
-        System.out.println("测试1 - 使用有效token创建寄存订单测试完成");
+        System.out.println("测试1 - 使用有效token创建寄存订单（小尺寸格口）测试完成");
+    }
+    
+    /**
+     * 测试2：使用有效token创建寄存订单（中尺寸格口）
+     * @throws Exception
+     */
+    @Test
+    void testCreateStorageWithMediumSize() throws Exception {
+        // 生成有效token
+        String validToken = JwtUtil.generateToken(2L, "user");
+        
+        // 构造请求体 - 使用中尺寸格口
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("lockerId", "1");
+        requestBody.put("compartmentSize", "medium");
+        requestBody.put("duration", "24");
+        requestBody.put("itemDescription", "行李箱");
+        
+        // 调用POST /storage/create接口
+        ResultActions result = mockMvc.perform(post("/api/v1/storage/create")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)));
+        
+        // 验证响应 - 只检查HTTP状态码为200，不检查响应内容，因为可能出现"该尺寸的空闲格口已用完"的情况
+        result.andExpect(status().isOk());
+        
+        System.out.println("测试2 - 使用有效token创建寄存订单（中尺寸格口）测试完成");
+    }
+    
+    /**
+     * 测试3：使用有效token创建寄存订单（大尺寸格口）
+     * @throws Exception
+     */
+    @Test
+    void testCreateStorageWithLargeSize() throws Exception {
+        // 生成有效token
+        String validToken = JwtUtil.generateToken(2L, "user");
+        
+        // 构造请求体 - 使用大尺寸格口
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("lockerId", "1");
+        requestBody.put("compartmentSize", "large");
+        requestBody.put("duration", "24");
+        requestBody.put("itemDescription", "大型包裹");
+        
+        // 调用POST /storage/create接口
+        ResultActions result = mockMvc.perform(post("/api/v1/storage/create")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)));
+        
+        // 验证响应 - 只检查HTTP状态码为200，不检查响应内容，因为可能出现"该尺寸的空闲格口已用完"的情况
+        result.andExpect(status().isOk());
+        
+        System.out.println("测试3 - 使用有效token创建寄存订单（大尺寸格口）测试完成");
+    }
+    
+    /**
+     * 测试4：使用有效token创建短时长寄存订单
+     * @throws Exception
+     */
+    @Test
+    void testCreateStorageWithShortDuration() throws Exception {
+        // 生成有效token
+        String validToken = JwtUtil.generateToken(2L, "user");
+        
+        // 构造请求体 - 使用短时长（6小时）
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("lockerId", "1");
+        requestBody.put("compartmentSize", "small");
+        requestBody.put("duration", "6");
+        requestBody.put("itemDescription", "书包");
+        
+        // 调用POST /storage/create接口
+        ResultActions result = mockMvc.perform(post("/api/v1/storage/create")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)));
+        
+        // 验证响应 - 只检查HTTP状态码为200，不检查响应内容，因为可能出现"该尺寸的空闲格口已用完"的情况
+        result.andExpect(status().isOk());
+        
+        System.out.println("测试4 - 使用有效token创建短时长寄存订单测试完成");
+    }
+    
+    /**
+     * 测试5：使用有效token创建长时长寄存订单
+     * @throws Exception
+     */
+    @Test
+    void testCreateStorageWithLongDuration() throws Exception {
+        // 生成有效token
+        String validToken = JwtUtil.generateToken(2L, "user");
+        
+        // 构造请求体 - 使用长时长（48小时）
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("lockerId", "1");
+        requestBody.put("compartmentSize", "small");
+        requestBody.put("duration", "48");
+        requestBody.put("itemDescription", "书包");
+        
+        // 调用POST /storage/create接口
+        ResultActions result = mockMvc.perform(post("/api/v1/storage/create")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)));
+        
+        // 验证响应 - 只检查HTTP状态码为200，不检查响应内容，因为可能出现"该尺寸的空闲格口已用完"的情况
+        result.andExpect(status().isOk());
+        
+        System.out.println("测试5 - 使用有效token创建长时长寄存订单测试完成");
     }
 
     /**
-     * 测试2：使用无效token创建寄存订单
+     * 测试6：使用无效token创建寄存订单
      * @throws Exception
      */
     @Test
@@ -82,11 +194,11 @@ class StorageControllerTest {
         // 验证响应
         result.andExpect(status().isUnauthorized());
         
-        System.out.println("测试2 - 使用无效token创建寄存订单返回401，符合预期");
+        System.out.println("测试6 - 使用无效token创建寄存订单返回401，符合预期");
     }
 
     /**
-     * 测试3：使用有效token获取寄存列表
+     * 测试7：使用有效token获取寄存列表
      * @throws Exception
      */
     @Test
@@ -107,11 +219,11 @@ class StorageControllerTest {
                 .andExpect(jsonPath("$.data.total").isNumber())
                 .andExpect(jsonPath("$.data.list").isArray());
         
-        System.out.println("测试3 - 使用有效token获取寄存列表成功");
+        System.out.println("测试7 - 使用有效token获取寄存列表成功");
     }
 
     /**
-     * 测试4：使用无效token获取寄存列表
+     * 测试8：使用无效token获取寄存列表
      * @throws Exception
      */
     @Test
@@ -127,6 +239,6 @@ class StorageControllerTest {
         // 验证响应
         result.andExpect(status().isUnauthorized());
         
-        System.out.println("测试4 - 使用无效token获取寄存列表返回401，符合预期");
+        System.out.println("测试8 - 使用无效token获取寄存列表返回401，符合预期");
     }
 }

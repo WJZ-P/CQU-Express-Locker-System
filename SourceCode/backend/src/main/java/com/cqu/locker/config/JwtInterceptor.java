@@ -21,6 +21,14 @@ public class JwtInterceptor implements HandlerInterceptor {
             return true;
         }
         
+        // 获取请求路径
+        String path = request.getServletPath();
+        
+        // 不需要认证的路径直接放行
+        if (path.startsWith("/api/v1/auth/")) {
+            return true;
+        }
+        
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
@@ -31,18 +39,23 @@ public class JwtInterceptor implements HandlerInterceptor {
             return false;
         }
         
-        // 验证token
-        if (!JwtUtil.verify(token)) {
+        try {
+            // 验证token
+            if (!JwtUtil.verify(token)) {
+                response.setStatus(401);
+                return false;
+            }
+            
+            // 将用户ID和类型存入request属性
+            Long userId = JwtUtil.getUserId(token);
+            String userType = JwtUtil.getUserType(token);
+            request.setAttribute("userId", userId);
+            request.setAttribute("userType", userType);
+            
+            return true;
+        } catch (Exception e) {
             response.setStatus(401);
             return false;
         }
-        
-        // 将用户ID和类型存入request属性
-        Long userId = JwtUtil.getUserId(token);
-        String userType = JwtUtil.getUserType(token);
-        request.setAttribute("userId", userId);
-        request.setAttribute("userType", userType);
-        
-        return true;
     }
 }

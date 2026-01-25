@@ -149,15 +149,15 @@ class CourierControllerTest {
     }
 
     /**
-     * 测试6：使用有效token投递快递
+     * 测试6：使用有效token投递快递（小尺寸格口）
      * @throws Exception
      */
     @Test
-    void testDeliverExpressWithValidToken() throws Exception {
+    void testDeliverExpressWithSmallSize() throws Exception {
         // 生成有效token
         String validToken = JwtUtil.generateToken(3L, "courier");
         
-        // 构造请求体
+        // 构造请求体 - 使用小尺寸格口
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("lockerId", "1");
         requestBody.put("compartmentSize", "small");
@@ -174,11 +174,98 @@ class CourierControllerTest {
         // 验证响应 - 只检查HTTP状态码为200，不检查响应内容，因为可能出现"该尺寸的空闲格口已用完"的情况
         result.andExpect(status().isOk());
         
-        System.out.println("测试6 - 使用有效token投递快递测试完成");
+        System.out.println("测试6 - 使用有效token投递快递（小尺寸格口）测试完成");
+    }
+    
+    /**
+     * 测试7：使用有效token投递快递（中尺寸格口）
+     * @throws Exception
+     */
+    @Test
+    void testDeliverExpressWithMediumSize() throws Exception {
+        // 生成有效token
+        String validToken = JwtUtil.generateToken(3L, "courier");
+        
+        // 构造请求体 - 使用中尺寸格口
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("lockerId", "1");
+        requestBody.put("compartmentSize", "medium");
+        requestBody.put("trackingNo", "SF1234567891");
+        requestBody.put("receiverPhone", "13800138000");
+        requestBody.put("receiverName", "张三");
+        
+        // 调用POST /courier/deliver接口
+        ResultActions result = mockMvc.perform(post("/api/v1/courier/deliver")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)));
+        
+        // 验证响应 - 只检查HTTP状态码为200，不检查响应内容，因为可能出现"该尺寸的空闲格口已用完"的情况
+        result.andExpect(status().isOk());
+        
+        System.out.println("测试7 - 使用有效token投递快递（中尺寸格口）测试完成");
+    }
+    
+    /**
+     * 测试8：使用有效token投递快递（大尺寸格口）
+     * @throws Exception
+     */
+    @Test
+    void testDeliverExpressWithLargeSize() throws Exception {
+        // 生成有效token
+        String validToken = JwtUtil.generateToken(3L, "courier");
+        
+        // 构造请求体 - 使用大尺寸格口
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("lockerId", "1");
+        requestBody.put("compartmentSize", "large");
+        requestBody.put("trackingNo", "SF1234567892");
+        requestBody.put("receiverPhone", "13800138000");
+        requestBody.put("receiverName", "张三");
+        
+        // 调用POST /courier/deliver接口
+        ResultActions result = mockMvc.perform(post("/api/v1/courier/deliver")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)));
+        
+        // 验证响应 - 只检查HTTP状态码为200，不检查响应内容，因为可能出现"该尺寸的空闲格口已用完"的情况
+        result.andExpect(status().isOk());
+        
+        System.out.println("测试8 - 使用有效token投递快递（大尺寸格口）测试完成");
+    }
+    
+    /**
+     * 测试9：使用不存在的lockerId投递快递
+     * @throws Exception
+     */
+    @Test
+    void testDeliverExpressWithInvalidLockerId() throws Exception {
+        // 生成有效token
+        String validToken = JwtUtil.generateToken(3L, "courier");
+        
+        // 构造请求体 - 使用不存在的lockerId
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("lockerId", "999");
+        requestBody.put("compartmentSize", "small");
+        requestBody.put("trackingNo", "SF1234567893");
+        requestBody.put("receiverPhone", "13800138000");
+        requestBody.put("receiverName", "张三");
+        
+        // 调用POST /courier/deliver接口
+        ResultActions result = mockMvc.perform(post("/api/v1/courier/deliver")
+                .header("Authorization", "Bearer " + validToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)));
+        
+        // 验证响应 - 只检查HTTP状态码为200
+        result.andExpect(status().isOk());
+        
+        System.out.println("测试9 - 使用不存在的lockerId投递快递测试完成");
     }
 
     /**
-     * 测试7：使用有效token开柜操作
+     * 测试10：使用有效token开柜操作
      * @throws Exception
      */
     @Test
@@ -201,6 +288,6 @@ class CourierControllerTest {
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value("success"));
         
-        System.out.println("测试7 - 使用有效token开柜操作成功");
+        System.out.println("测试10 - 使用有效token开柜操作成功");
     }
 }
