@@ -14,6 +14,7 @@ import me.wjz.cquexpresslocker.navigation.UserNavItem
 @Composable
 fun UserMainScreen(
     onNavigateToExpressDetail: (String) -> Unit,
+    onNavigateToPickup: (String) -> Unit,
     onNavigateToSendExpress: () -> Unit,
     onNavigateToHistory: () -> Unit,
     onLogout: () -> Unit,
@@ -68,7 +69,10 @@ fun UserMainScreen(
                 )
             }
             composable(UserNavItem.Pickup.route) {
-                UserPickupScreen(onNavigateToExpressDetail = onNavigateToExpressDetail)
+                UserPickupScreen(
+                    onNavigateToExpressDetail = onNavigateToExpressDetail,
+                    onNavigateToPickup = onNavigateToPickup
+                )
             }
             composable(UserNavItem.Scan.route) {
                 UserScanScreen()

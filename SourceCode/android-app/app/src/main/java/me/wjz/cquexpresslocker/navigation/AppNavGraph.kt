@@ -71,6 +71,9 @@ fun AppNavGraph(
                 onNavigateToExpressDetail = { expressId ->
                     navController.navigate("user_express_detail/$expressId")
                 },
+                onNavigateToPickup = { expressId ->
+                    navController.navigate("user_pickup/$expressId")
+                },
                 onNavigateToSendExpress = {
                     navController.navigate(AppRoutes.USER_SEND_EXPRESS)
                 },
@@ -102,6 +105,20 @@ fun AppNavGraph(
             val expressId = backStackEntry.arguments?.getString("expressId") ?: ""
             ExpressDetailScreen(
                 expressId = expressId,
+                onNavigateToPickup = { navController.navigate("user_pickup/$expressId") },
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        
+        // 用户取件验证
+        composable("user_pickup/{expressId}") { backStackEntry ->
+            val expressId = backStackEntry.arguments?.getString("expressId") ?: ""
+            PickupScreen(
+                expressId = expressId,
+                onPickupSuccess = { _, _ ->
+                    navController.popBackStack(AppRoutes.USER_EXPRESS_DETAIL, inclusive = true)
+                    navController.navigate(AppRoutes.USER_MAIN)
+                },
                 onNavigateBack = { navController.popBackStack() }
             )
         }

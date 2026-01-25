@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import me.wjz.cquexpresslocker.network.ApiClient
 import me.wjz.cquexpresslocker.network.ExpressItemData
+import me.wjz.cquexpresslocker.network.OpenCompartmentRequest
 
 sealed class UserPickupUiState {
     data object Loading : UserPickupUiState()
@@ -48,5 +49,20 @@ class UserPickupViewModel : ViewModel() {
     
     fun refresh() {
         loadPendingExpress()
+    }
+    
+    fun openCompartment(expressId: String) {
+        viewModelScope.launch {
+            try {
+                val response = ApiClient.apiService.openCompartment(
+                    OpenCompartmentRequest(expressId = expressId)
+                )
+                if (response.code != 200) {
+                    // 开柜失败，可以在此处处理错误提示
+                }
+            } catch (e: Exception) {
+                // 网络错误处理
+            }
+        }
     }
 }

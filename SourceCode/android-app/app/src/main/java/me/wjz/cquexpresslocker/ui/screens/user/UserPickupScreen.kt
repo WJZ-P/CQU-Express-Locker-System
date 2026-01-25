@@ -22,18 +22,19 @@ import me.wjz.cquexpresslocker.viewmodels.user.UserPickupViewModel
 @Composable
 fun UserPickupScreen(
     onNavigateToExpressDetail: (String) -> Unit,
+    onNavigateToPickup: (String) -> Unit,
     viewModel: UserPickupViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var pickupCode by remember { mutableStateOf("") }
     var showCodeInput by remember { mutableStateOf(false) }
-    
+
     Column(modifier = Modifier.fillMaxSize()) {
         // 顶部标题
         TopAppBar(
             title = { Text("取件") }
         )
-        
+
         // 取件方式
         Row(
             modifier = Modifier
@@ -62,7 +63,7 @@ fun UserPickupScreen(
                     Text("扫码取件", fontWeight = FontWeight.Medium)
                 }
             }
-            
+
             ElevatedCard(
                 modifier = Modifier
                     .weight(1f)
@@ -85,7 +86,7 @@ fun UserPickupScreen(
                 }
             }
         }
-        
+
         // 取件码输入
         if (showCodeInput) {
             Card(
@@ -112,9 +113,9 @@ fun UserPickupScreen(
                 }
             }
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // 根据状态显示内容
         when (uiState) {
             is UserPickupUiState.Loading -> {
@@ -127,14 +128,14 @@ fun UserPickupScreen(
             }
             is UserPickupUiState.Success -> {
                 val items = (uiState as UserPickupUiState.Success).items
-                
+
                 Text(
                     text = "待取件 (${items.size})",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                
+
                 LazyColumn(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -142,7 +143,8 @@ fun UserPickupScreen(
                     items(items) { item ->
                         PickupCard(
                             item = item,
-                            onClick = { onNavigateToExpressDetail(item.expressId) }
+                            onClick = { onNavigateToExpressDetail(item.expressId) },
+                            onOpenCompartment = { expressId -> onNavigateToPickup(expressId) }
                         )
                     }
                 }
@@ -160,14 +162,22 @@ fun UserPickupScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
                         Text(
                             text = (uiState as UserPickupUiState.Error).message,
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.error
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { viewModel.refresh() }) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(
+                            onClick = { viewModel.refresh() },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                        ) {
                             Text("重试")
                         }
                     }
@@ -180,7 +190,8 @@ fun UserPickupScreen(
 @Composable
 private fun PickupCard(
     item: ExpressItemData,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onOpenCompartment: (expressId: String) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -206,17 +217,17 @@ private fun PickupCard(
                     )
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Text(
                 item.trackingNo,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 14.sp
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     Icons.Default.LocationOn,
@@ -231,9 +242,9 @@ private fun PickupCard(
                     fontSize = 14.sp
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -253,11 +264,11 @@ private fun PickupCard(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             Button(
-                onClick = { /* 一键开柜 */ },
+                onClick = { onOpenCompartment(item.expressId) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(Icons.Default.LockOpen, contentDescription = null)

@@ -24,6 +24,7 @@ import me.wjz.cquexpresslocker.viewmodels.user.ExpressDetailViewModel
 @Composable
 fun ExpressDetailScreen(
     expressId: String,
+    onNavigateToPickup: (String) -> Unit = {},
     onNavigateBack: () -> Unit
 ) {
     val viewModel: ExpressDetailViewModel = viewModel(
@@ -60,7 +61,7 @@ fun ExpressDetailScreen(
             }
             is ExpressDetailUiState.Success -> {
                 val detail = (uiState as ExpressDetailUiState.Success).detail
-                ExpressDetailContent(detail)
+                ExpressDetailContent(detail, expressId, onNavigateToPickup)
             }
             is ExpressDetailUiState.Error -> {
                 Box(
@@ -85,7 +86,11 @@ fun ExpressDetailScreen(
 }
 
 @Composable
-private fun ExpressDetailContent(detail: ExpressDetail) {
+private fun ExpressDetailContent(
+    detail: ExpressDetail,
+    expressId: String,
+    onNavigateToPickup: (String) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -220,7 +225,7 @@ private fun ExpressDetailContent(detail: ExpressDetail) {
         
         // 开柜按钮
         Button(
-            onClick = { /* 一键开柜 */ },
+            onClick = { onNavigateToPickup(expressId) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
