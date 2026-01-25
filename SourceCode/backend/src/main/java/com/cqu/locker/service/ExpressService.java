@@ -70,4 +70,11 @@ public interface ExpressService {
      * @return 历史记录列表
      */
     HistoryResponse getHistory(Long userId, String type, Integer page, Integer pageSize);
+    
+    /**
+     * 获取快递柜可用格口信息
+     * @param lockerId 快递柜ID
+     * @return 快递柜可用格口信息
+     */
+    LockerAvailabilityResponse getLockerAvailability(Long lockerId);
 }

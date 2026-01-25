@@ -65,11 +65,11 @@ class UserHomeViewModel : ViewModel() {
                 }
 
                 val recentStorage = if (storageResponse.code == 200) {
-                    storageResponse.data.records.firstOrNull()?.let { record ->
+                    storageResponse.data.list.firstOrNull()?.let { record ->
                         StorageItem(
-                            location = record.boxId?.let { "柜格$it" } ?: "-",
-                            pickupCode = record.pickupCode ?: "-",
-                            status = mapStorageStatus(record.status)
+                            location = record.lockerName,
+                            pickupCode = record.openCode,
+                            status = record.status
                         )
                     }
                 } else {

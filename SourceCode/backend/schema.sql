@@ -121,8 +121,32 @@ INSERT INTO `sys_courier` (`user_id`, `company`, `employee_id`) VALUES (3, '顺�
 
 -- 测试快递柜和格口数据
 INSERT INTO `iot_locker` (`serial_no`, `location`, `ip_address`, `status`) VALUES ('LOCKER001', '测试位置1', '192.168.1.100', 1);
+
+-- 快递柜1的格口：小仓(size=1) 8个、中仓(size=2) 8个、大仓(size=3) 4个
+-- 小仓 (size=1)
 INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'A01', 1, 0, 1);
-INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'A02', 2, 0, 1);
-INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'A03', 3, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'A02', 1, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'A03', 1, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'A04', 1, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'A05', 1, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'A06', 1, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'A07', 1, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'A08', 1, 0, 1);
+
+-- 中仓 (size=2)
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'B01', 2, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'B02', 2, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'B03', 2, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'B04', 2, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'B05', 2, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'B06', 2, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'B07', 2, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'B08', 2, 0, 1);
+
+-- 大仓 (size=3)
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'C01', 3, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'C02', 3, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'C03', 3, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'C04', 3, 0, 1);
 
 INSERT INTO `sys_config` (`param_key`, `param_value`, `description`) VALUES ('sys_name', '快递柜综合应用系统', '系统名称'), ('pickup_timeout', '24', '取件超时时间(h)');

@@ -320,7 +320,8 @@ public class ExpressServiceImpl implements ExpressService {
         LambdaQueryWrapper<IotBox> boxWrapper = new LambdaQueryWrapper<>();
         boxWrapper.eq(IotBox::getLockerId, lockerId)
                 .eq(IotBox::getSize, size)
-                .eq(IotBox::getStatus, 0); // 0-空闲
+                .eq(IotBox::getStatus, 0) // 0-空闲
+                .last("limit 1");
         
         IotBox box = boxMapper.selectOne(boxWrapper);
         if (box == null) {
@@ -521,6 +522,46 @@ public class ExpressServiceImpl implements ExpressService {
                 .page(page)
                 .pageSize(pageSize)
                 .list(items)
+                .build();
+    }
+    
+    /**
+     * 获取快递柜的可用格口信息
+     */
+    public LockerAvailabilityResponse getLockerAvailability(Long lockerId) {
+        // 查询快递柜基本信息
+        IotLocker locker = lockerMapper.selectById(lockerId);
+        if (locker == null) {
+            throw new RuntimeException("快递柜不存在");
+        }
+        
+        // 查询小格口空闲数量
+        LambdaQueryWrapper<IotBox> smallWrapper = new LambdaQueryWrapper<>();
+        smallWrapper.eq(IotBox::getLockerId, lockerId)
+                .eq(IotBox::getSize, 1)
+                .eq(IotBox::getStatus, 0);
+        Integer smallCount = boxMapper.selectCount(smallWrapper).intValue();
+        
+        // 查询中格口空闲数量
+        LambdaQueryWrapper<IotBox> mediumWrapper = new LambdaQueryWrapper<>();
+        mediumWrapper.eq(IotBox::getLockerId, lockerId)
+                .eq(IotBox::getSize, 2)
+                .eq(IotBox::getStatus, 0);
+        Integer mediumCount = boxMapper.selectCount(mediumWrapper).intValue();
+        
+        // 查询大格口空闲数量
+        LambdaQueryWrapper<IotBox> largeWrapper = new LambdaQueryWrapper<>();
+        largeWrapper.eq(IotBox::getLockerId, lockerId)
+                .eq(IotBox::getSize, 3)
+                .eq(IotBox::getStatus, 0);
+        Integer largeCount = boxMapper.selectCount(largeWrapper).intValue();
+        
+        return LockerAvailabilityResponse.builder()
+                .lockerId(lockerId)
+                .lockerName(locker.getLocation())
+                .smallCount(smallCount)
+                .mediumCount(mediumCount)
+                .largeCount(largeCount)
                 .build();
     }
 }

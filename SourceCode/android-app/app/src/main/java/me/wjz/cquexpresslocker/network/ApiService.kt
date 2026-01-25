@@ -236,6 +236,63 @@ data class StorageOrderItem(
     val finishTime: String? = null
 )
 
+// ===================== 寄存模块（新版） =====================
+
+/**
+ * 创建寄存请求
+ */
+data class CreateStorageRequest(
+    val lockerId: String,           // 快递柜ID
+    val compartmentSize: String,    // small/medium/large
+    val duration: Int,              // 寄存时长(小时)
+    val itemDescription: String     // 物品描述
+)
+
+/**
+ * 创建寄存响应
+ */
+data class CreateStorageResponse(
+    val storageId: String,          // 寄存单号
+    val compartmentNo: String,      // 格口号
+    val openCode: String,           // 6位取件码
+    val expireTime: String,         // 过期时间
+    val fee: Double                 // 费用
+)
+
+/**
+ * 寄存列表项
+ */
+data class StorageListItem(
+    val storageId: String,
+    val lockerName: String,
+    val compartmentNo: String,
+    val compartmentSize: String,
+    val status: String,            // active/completed/expired
+    val createTime: String,
+    val expireTime: String,
+    val openCode: String,
+    val itemDescription: String
+)
+
+/**
+ * 寄存列表响应
+ */
+data class StorageListResponse(
+    val total: Int,
+    val list: List<StorageListItem>
+)
+
+/**
+ * 快递柜可用格口信息
+ */
+data class LockerAvailabilityResponse(
+    val lockerId: Long,
+    val lockerName: String,
+    val smallCount: Int,
+    val mediumCount: Int,
+    val largeCount: Int
+)
+
 interface ApiService {
 
     // ===================== 认证接口 =====================
@@ -310,13 +367,33 @@ interface ApiService {
     @POST("express/send")
     suspend fun sendExpress(@Body request: SendExpressRequest): ApiResponse<SendExpressData>
 
+    // ===================== 寄存接口 =====================
+
+    /**
+     * 创建寄存订单
+     */
+    @POST("storage/create")
+    suspend fun createStorage(@Body request: CreateStorageRequest): ApiResponse<CreateStorageResponse>
+
+    /**
+     * 获取寄存列表
+     */
+    @GET("storage/list")
+    suspend fun getStorageList(): ApiResponse<StorageListResponse>
+
+    /**
+     * 获取快递柜可用格口信息
+     */
+    @GET("locker/availability/{lockerId}")
+    suspend fun getLockerAvailability(@Path("lockerId") lockerId: String): ApiResponse<LockerAvailabilityResponse>
+
     // ===================== 旧版寄存接口 =====================
 
     /**
      * 获取寄存记录（旧版接口，非 /api/v1 前缀）
      */
     @GET("/api/storage/list")
-    suspend fun getStorageList(
+    suspend fun getStorageListLegacy(
         @Query("current") current: Int = 1,
         @Query("size") size: Int = 1
     ): ApiResponse<PageData<StorageOrderItem>>

@@ -10,14 +10,22 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import me.wjz.cquexpresslocker.network.StorageListItem
+import me.wjz.cquexpresslocker.viewmodels.user.UserStorageUiState
+import me.wjz.cquexpresslocker.viewmodels.user.UserStorageViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserStorageScreen() {
-    var selectedTab by remember { mutableStateOf(0) }
+fun UserStorageScreen(
+    viewModel: UserStorageViewModel = viewModel()
+) {
+    var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("存物品", "我的寄存")
+    val uiState by viewModel.uiState.collectAsState()
     
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
@@ -36,14 +44,21 @@ fun UserStorageScreen() {
         }
         
         when (selectedTab) {
-            0 -> StorageNewScreen()
-            1 -> StorageListScreen()
+            0 -> StorageNewScreen(viewModel)
+            1 -> StorageListScreen(uiState, viewModel)
         }
     }
 }
 
 @Composable
-private fun StorageNewScreen() {
+private fun StorageNewScreen(viewModel: UserStorageViewModel) {
+    var showDialog by remember { mutableStateOf(false) }
+    var selectedCompartmentSize by remember { mutableStateOf("medium") }
+    var selectedLockerId by remember { mutableStateOf("") }
+    var itemDescription by remember { mutableStateOf("") }
+    var duration by remember { mutableStateOf("24") }
+    val uiState by viewModel.uiState.collectAsState()
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -59,62 +74,63 @@ private fun StorageNewScreen() {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("寄存流程", fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
-                StorageStep(1, "扫描快递柜二维码")
-                StorageStep(2, "选择空闲仓门")
-                StorageStep(3, "放入物品并关门")
-                StorageStep(4, "分享取件码给朋友")
+                StorageStep(1, "选择快递柜和仓位大小")
+                StorageStep(2, "填写物品描述")
+                StorageStep(3, "选择寄存时长")
+                StorageStep(4, "获取取件码，分享给朋友")
             }
         }
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        // 扫码按钮
+        // 创建寄存按钮
         Button(
-            onClick = { /* 扫码开始寄存 */ },
+            onClick = { showDialog = true },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
         ) {
-            Icon(Icons.Default.QrCodeScanner, contentDescription = null)
+            Icon(Icons.Default.AddBox, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("扫码寄存", fontSize = 16.sp)
+            Text("新建寄存", fontSize = 16.sp)
         }
         
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // 仓位选择（模拟）
-        Text(
-            "附近可用仓位",
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-        
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column {
-                        Text("重庆大学A区1号门", fontWeight = FontWeight.Medium)
-                        Text(
-                            "距离约100米",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 14.sp
-                        )
-                    }
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text("空闲 5 个", color = MaterialTheme.colorScheme.primary)
-                    }
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    CompartmentChip("小仓", "2个", true)
-                    CompartmentChip("中仓", "2个", true)
-                    CompartmentChip("大仓", "1个", true)
+        // 加载状态处理
+        when (uiState) {
+            is UserStorageUiState.Loading -> {
+                Spacer(modifier = Modifier.height(24.dp))
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
             }
+            is UserStorageUiState.CreateStorageSuccess -> {
+                Spacer(modifier = Modifier.height(24.dp))
+                SuccessMessage(
+                    message = "寄存成功！取件码：${(uiState as UserStorageUiState.CreateStorageSuccess).data.openCode}",
+                    onDismiss = { viewModel.resetState() }
+                )
+            }
+            is UserStorageUiState.Error -> {
+                Spacer(modifier = Modifier.height(24.dp))
+                ErrorMessage(
+                    message = (uiState as UserStorageUiState.Error).message,
+                    onDismiss = { viewModel.resetState() }
+                )
+            }
+            else -> {}
         }
+    }
+    
+    // 创建寄存对话框
+    if (showDialog) {
+        CreateStorageDialog(
+            onDismiss = { showDialog = false },
+            onConfirm = { lockerId, size, duration, description ->
+                viewModel.createStorage(lockerId, size, duration, description)
+                showDialog = false
+            },
+            viewModel = viewModel
+        )
     }
 }
 
@@ -143,66 +159,81 @@ private fun StorageStep(number: Int, text: String) {
 }
 
 @Composable
-private fun CompartmentChip(size: String, count: String, available: Boolean) {
-    AssistChip(
-        onClick = { },
-        label = { Text("$size $count") },
-        colors = if (available) {
-            AssistChipDefaults.assistChipColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
-            )
-        } else {
-            AssistChipDefaults.assistChipColors()
-        }
-    )
-}
-
-@Composable
-private fun StorageListScreen() {
-    val storageItems = listOf(
-        StorageItem("S001", "重庆大学A区1号门", "L001-C02", "998877", "2026-01-18 11:00", "寄存中"),
-        StorageItem("S002", "重庆大学B区食堂", "L003-C04", "556677", "2026-01-17 15:30", "已取出")
-    )
+private fun StorageListScreen(uiState: UserStorageUiState, viewModel: UserStorageViewModel) {
+    // 首次进入时加载列表
+    LaunchedEffect(Unit) {
+        viewModel.loadStorageList()
+    }
     
-    if (storageItems.isEmpty()) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    Icons.Default.Archive,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("暂无寄存记录", color = MaterialTheme.colorScheme.onSurfaceVariant)
+    when (uiState) {
+        is UserStorageUiState.Loading, UserStorageUiState.Initial -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
         }
-    } else {
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(storageItems) { item ->
-                StorageCard(item)
+        is UserStorageUiState.StorageListLoaded -> {
+            if (uiState.data.list.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.Archive,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("暂无寄存记录", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(uiState.data.list) { item ->
+                        StorageCard(item)
+                    }
+                }
             }
         }
+        is UserStorageUiState.Error -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        Icons.Default.ErrorOutline,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        uiState.message,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(16.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { viewModel.loadStorageList() }) {
+                        Text("重试")
+                    }
+                }
+            }
+        }
+        else -> {}
     }
 }
 
-data class StorageItem(
-    val id: String,
-    val location: String,
-    val compartment: String,
-    val pickupCode: String,
-    val time: String,
-    val status: String
-)
-
 @Composable
-private fun StorageCard(item: StorageItem) {
+private fun StorageCard(item: StorageListItem) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
@@ -214,11 +245,11 @@ private fun StorageCard(item: StorageItem) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(item.location, fontWeight = FontWeight.Medium)
+                Text(item.lockerName, fontWeight = FontWeight.Medium)
                 AssistChip(
                     onClick = { },
-                    label = { Text(item.status) },
-                    colors = if (item.status == "寄存中") {
+                    label = { Text(mapStorageStatus(item.status)) },
+                    colors = if (item.status == "active") {
                         AssistChipDefaults.assistChipColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         )
@@ -236,12 +267,12 @@ private fun StorageCard(item: StorageItem) {
             ) {
                 Column {
                     Text("柜门", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(item.compartment)
+                    Text(item.compartmentNo)
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text("取件码", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(
-                        item.pickupCode,
+                        item.openCode,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -251,12 +282,20 @@ private fun StorageCard(item: StorageItem) {
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                "寄存时间: ${item.time}",
+                "物品: ${item.itemDescription}",
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
-            if (item.status == "寄存中") {
+            Spacer(modifier = Modifier.height(4.dp))
+            
+            Text(
+                "寄存: ${item.createTime} 至 ${item.expireTime}",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            if (item.status == "active") {
                 Spacer(modifier = Modifier.height(12.dp))
                 OutlinedButton(
                     onClick = { /* 分享取件码 */ },
@@ -268,5 +307,218 @@ private fun StorageCard(item: StorageItem) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CreateStorageDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String, String, Int, String) -> Unit,
+    viewModel: UserStorageViewModel
+) {
+    var lockerId by remember { mutableStateOf("1") }
+    var compartmentSize by remember { mutableStateOf("medium") }
+    var duration by remember { mutableStateOf("24") }
+    var itemDescription by remember { mutableStateOf("") }
+    
+    val availability by viewModel.lockerAvailability.collectAsState()
+    
+    // 当快递柜ID改变时，加载该柜的可用格口信息
+    LaunchedEffect(lockerId) {
+        if (lockerId.isNotBlank()) {
+            viewModel.loadLockerAvailability(lockerId)
+        }
+    }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("新建寄存") },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // 快递柜选择
+                OutlinedTextField(
+                    value = lockerId,
+                    onValueChange = { lockerId = it },
+                    label = { Text("快递柜ID（数字）") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+                
+                // 显示快递柜可用格口信息
+                if (availability != null) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+                                Text("小仓", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("${availability!!.smallCount}", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+                                Text("中仓", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("${availability!!.mediumCount}", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+                                Text("大仓", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("${availability!!.largeCount}", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+                
+                // 仓位大小选择
+                Text("仓位大小", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf("small", "medium", "large").forEach { size ->
+                        FilterChip(
+                            selected = compartmentSize == size,
+                            onClick = { compartmentSize = size },
+                            label = { 
+                                Text(
+                                    mapCompartmentSize(size),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center
+                                )
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                
+                // 寄存时长
+                OutlinedTextField(
+                    value = duration,
+                    onValueChange = { duration = it },
+                    label = { Text("寄存时长(小时)") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                )
+                
+                // 物品描述
+                OutlinedTextField(
+                    value = itemDescription,
+                    onValueChange = { itemDescription = it },
+                    label = { Text("物品描述") },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 3
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (lockerId.isNotBlank() && duration.isNotBlank()) {
+                        onConfirm(lockerId, compartmentSize, duration.toIntOrNull() ?: 24, itemDescription)
+                    }
+                }
+            ) {
+                Text("确认")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("取消")
+            }
+        }
+    )
+}
+
+@Composable
+private fun SuccessMessage(message: String, onDismiss: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Icon(
+                Icons.Default.CheckCircle,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
+            )
+            Column(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                Text("成功", fontWeight = FontWeight.Bold)
+                Text(message, fontSize = 12.sp)
+            }
+            IconButton(onClick = onDismiss) {
+                Icon(Icons.Default.Close, contentDescription = null)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ErrorMessage(message: String, onDismiss: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Icon(
+                Icons.Default.ErrorOutline,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(32.dp)
+            )
+            Column(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                Text("错误", fontWeight = FontWeight.Bold)
+                Text(message, fontSize = 12.sp)
+            }
+            IconButton(onClick = onDismiss) {
+                Icon(Icons.Default.Close, contentDescription = null)
+            }
+        }
+    }
+}
+
+private fun mapStorageStatus(status: String): String {
+    return when (status) {
+        "active" -> "寄存中"
+        "completed" -> "已取出"
+        "expired" -> "已过期"
+        else -> status
+    }
+}
+
+private fun mapCompartmentSize(size: String): String {
+    return when (size) {
+        "small" -> "小仓\n(¥0.5/h)"
+        "medium" -> "中仓\n(¥1/h)"
+        "large" -> "大仓\n(¥1.5/h)"
+        else -> size
     }
 }

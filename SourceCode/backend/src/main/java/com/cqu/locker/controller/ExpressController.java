@@ -146,6 +146,20 @@ public class ExpressController {
     }
     
     /**
+     * 获取快递柜可用格口信息
+     */
+    @GetMapping("/v1/locker/availability/{lockerId}")
+    public Result<LockerAvailabilityResponse> getLockerAvailability(@PathVariable Long lockerId) {
+        try {
+            LockerAvailabilityResponse response = expressService.getLockerAvailability(lockerId);
+            return Result.success(response);
+        } catch (Exception e) {
+            log.error("获取快递柜可用格口信息失败", e);
+            return Result.error(e.getMessage());
+        }
+    }
+    
+    /**
      * 获取历史记录
      */
     @GetMapping("/v1/history")
