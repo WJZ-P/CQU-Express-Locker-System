@@ -81,6 +81,11 @@ fun AppNavGraph(
                     navController.navigate(AppRoutes.LOGIN) {
                         popUpTo(AppRoutes.USER_MAIN) { inclusive = true }
                     }
+                },
+                onSessionExpired = {
+                    navController.navigate(AppRoutes.LOGIN) {
+                        popUpTo(AppRoutes.USER_MAIN) { inclusive = true }
+                    }
                 }
             )
         }

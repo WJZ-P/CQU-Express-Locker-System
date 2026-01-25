@@ -69,11 +69,11 @@ class RegisterViewModel : ViewModel() {
     }
 
     //  实际注册账号逻辑
-    fun register(phone: String, verifyCode: String, password: String, userType: String) {
+    fun register(phone: String, verifyCode: String, password: String, userType: String, username: String) {
         viewModelScope.launch {
             try {
                 _registerState.value = RegisterState.Loading
-                val registerRequest = RegisterRequest(phone, password, verifyCode, userType)
+                val registerRequest = RegisterRequest(phone, password, verifyCode, userType, username)
                 val response = ApiClient.apiService.register(registerRequest)
                 if (response.code == 200) {
                     _registerState.value = RegisterState.Success(response.data)

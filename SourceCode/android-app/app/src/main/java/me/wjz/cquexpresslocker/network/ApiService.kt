@@ -2,6 +2,9 @@ package me.wjz.cquexpresslocker.network
 
 import com.google.gson.GsonBuilder
 import me.wjz.cquexpresslocker.BuildConfig
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
+import me.wjz.cquexpresslocker.utils.TokenManager
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -53,7 +56,8 @@ data class RegisterRequest(
     val phone: String,
     val password: String,
     val verifyCode: String,
-    val userType: String
+    val userType: String,
+    val username: String
 )
 
 /**
@@ -203,6 +207,35 @@ data class SendExpressData(
     val estimatedFee: Double
 )
 
+/**
+ * 分页通用结构
+ */
+data class PageData<T>(
+    val records: List<T>,
+    val total: Long? = null,
+    val size: Long? = null,
+    val current: Long? = null,
+    val pages: Long? = null
+)
+
+/**
+ * 寄存记录（旧版接口）
+ */
+data class StorageOrderItem(
+    val id: Long? = null,
+    val orderNo: String? = null,
+    val type: Int? = null,
+    val trackingNo: String? = null,
+    val pickupCode: String? = null,
+    val boxId: Long? = null,
+    val courierId: Long? = null,
+    val userId: Long? = null,
+    val receiverPhone: String? = null,
+    val status: Int? = null,
+    val createTime: String? = null,
+    val finishTime: String? = null
+)
+
 interface ApiService {
 
     // ===================== 认证接口 =====================
@@ -276,7 +309,19 @@ interface ApiService {
      */
     @POST("express/send")
     suspend fun sendExpress(@Body request: SendExpressRequest): ApiResponse<SendExpressData>
+
+    // ===================== 旧版寄存接口 =====================
+
+    /**
+     * 获取寄存记录（旧版接口，非 /api/v1 前缀）
+     */
+    @GET("/api/storage/list")
+    suspend fun getStorageList(
+        @Query("current") current: Int = 1,
+        @Query("size") size: Int = 1
+    ): ApiResponse<PageData<StorageOrderItem>>
 }
+
 
 object ApiClient {
     private const val BASE_URL = BuildConfig.BASE_URL
@@ -288,6 +333,18 @@ object ApiClient {
     }
 
     private val okHttpClient = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            val originalRequest = chain.request()
+            val token = runBlocking { TokenManager.getToken().firstOrNull() }
+            val newRequest = if (!token.isNullOrBlank()) {
+                originalRequest.newBuilder()
+                    .addHeader("Authorization", "Bearer $token")
+                    .build()
+            } else {
+                originalRequest
+            }
+            chain.proceed(newRequest)
+        }
         .addInterceptor(loggingInterceptor)
         .connectTimeout(2, TimeUnit.SECONDS)
         .readTimeout(2, TimeUnit.SECONDS)

@@ -39,7 +39,7 @@ fun RegisterScreen(
     val remainingTime by viewModel.remainingTime.collectAsState()
     val registerState by viewModel.registerState.collectAsState()
     
-    LaunchedEffect(sendCodeState,registerState) {
+    LaunchedEffect(sendCodeState, registerState) {
         when (val state = sendCodeState) {
             is SendCodeState.Error -> {
                 errorMessage = state.message
@@ -217,7 +217,7 @@ fun RegisterScreen(
             Button(
                 onClick = {
                     isLoading = true
-                    viewModel.register(phone, verifyCode, password, if (isUserMode) "user" else "courier")
+                    viewModel.register(phone, verifyCode, password, if (isUserMode) "user" else "courier", name)
                 },
                 enabled = name.isNotEmpty() && phone.isNotEmpty() && 
                          password.isNotEmpty() && password == confirmPassword && !isLoading,

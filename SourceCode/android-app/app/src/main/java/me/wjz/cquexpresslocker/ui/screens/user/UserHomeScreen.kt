@@ -24,9 +24,16 @@ import me.wjz.cquexpresslocker.viewmodels.user.StorageItem
 fun UserHomeScreen(
     onNavigateToExpressDetail: (String) -> Unit,
     onNavigateToSendExpress: () -> Unit,
+    onSessionExpired: () -> Unit,
     viewModel: UserHomeViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(uiState) {
+        if (uiState is UserHomeUiState.Unauthorized) {
+            onSessionExpired()
+        }
+    }
 
     when (val state = uiState) {
         is UserHomeUiState.Loading -> {
@@ -57,6 +64,14 @@ fun UserHomeScreen(
                 onNavigateToExpressDetail = onNavigateToExpressDetail,
                 onNavigateToSendExpress = onNavigateToSendExpress
             )
+        }
+        UserHomeUiState.Unauthorized -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         }
     }
 }

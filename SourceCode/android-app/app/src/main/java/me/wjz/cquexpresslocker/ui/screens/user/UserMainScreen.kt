@@ -16,7 +16,8 @@ fun UserMainScreen(
     onNavigateToExpressDetail: (String) -> Unit,
     onNavigateToSendExpress: () -> Unit,
     onNavigateToHistory: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onSessionExpired: () -> Unit
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -62,7 +63,8 @@ fun UserMainScreen(
             composable(UserNavItem.Home.route) {
                 UserHomeScreen(
                     onNavigateToExpressDetail = onNavigateToExpressDetail,
-                    onNavigateToSendExpress = onNavigateToSendExpress
+                    onNavigateToSendExpress = onNavigateToSendExpress,
+                    onSessionExpired = onSessionExpired
                 )
             }
             composable(UserNavItem.Pickup.route) {
