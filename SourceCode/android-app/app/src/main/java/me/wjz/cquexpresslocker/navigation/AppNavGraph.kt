@@ -97,6 +97,15 @@ fun AppNavGraph(
             )
         }
         
+        // 用户快递详情
+        composable(AppRoutes.USER_EXPRESS_DETAIL) { backStackEntry ->
+            val expressId = backStackEntry.arguments?.getString("expressId") ?: ""
+            ExpressDetailScreen(
+                expressId = expressId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        
         // 用户历史记录
         composable(AppRoutes.USER_HISTORY) {
             HistoryScreen(

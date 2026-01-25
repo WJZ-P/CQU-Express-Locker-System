@@ -13,12 +13,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import me.wjz.cquexpresslocker.network.ExpressItemData
+import me.wjz.cquexpresslocker.viewmodels.user.UserPickupUiState
+import me.wjz.cquexpresslocker.viewmodels.user.UserPickupViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserPickupScreen(
-    onNavigateToExpressDetail: (String) -> Unit
+    onNavigateToExpressDetail: (String) -> Unit,
+    viewModel: UserPickupViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     var pickupCode by remember { mutableStateOf("") }
     var showCodeInput by remember { mutableStateOf(false) }
     
@@ -109,44 +115,71 @@ fun UserPickupScreen(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // 待取件列表
-        Text(
-            text = "待取件 (2)",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-        
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(listOf(
-                PickupItem("SF1234567890", "顺丰速运", "重庆大学A区1号门", "L001", "C03", "123456", "待取件"),
-                PickupItem("YT9876543210", "圆通速递", "重庆大学A区2号门", "L002", "C05", "654321", "待取件")
-            )) { item ->
-                PickupCard(
-                    item = item,
-                    onClick = { onNavigateToExpressDetail(item.trackingNo) }
+        // 根据状态显示内容
+        when (uiState) {
+            is UserPickupUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            is UserPickupUiState.Success -> {
+                val items = (uiState as UserPickupUiState.Success).items
+                
+                Text(
+                    text = "待取件 (${items.size})",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
+                
+                LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(items) { item ->
+                        PickupCard(
+                            item = item,
+                            onClick = { onNavigateToExpressDetail(item.expressId) }
+                        )
+                    }
+                }
+            }
+            is UserPickupUiState.Empty -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("暂无待取件快递", fontSize = 16.sp)
+                }
+            }
+            is UserPickupUiState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = (uiState as UserPickupUiState.Error).message,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { viewModel.refresh() }) {
+                            Text("重试")
+                        }
+                    }
+                }
             }
         }
     }
 }
 
-data class PickupItem(
-    val trackingNo: String,
-    val company: String,
-    val location: String,
-    val lockerId: String,
-    val compartmentId: String,
-    val pickupCode: String,
-    val status: String
-)
-
 @Composable
 private fun PickupCard(
-    item: PickupItem,
+    item: ExpressItemData,
     onClick: () -> Unit
 ) {
     Card(
@@ -167,7 +200,7 @@ private fun PickupCard(
                 Text(item.company, fontWeight = FontWeight.Bold)
                 AssistChip(
                     onClick = { },
-                    label = { Text(item.status) },
+                    label = { Text(mapStatusToChinese(item.status)) },
                     colors = AssistChipDefaults.assistChipColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
@@ -193,7 +226,7 @@ private fun PickupCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    item.location,
+                    item.lockerName,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp
                 )
@@ -208,7 +241,7 @@ private fun PickupCard(
             ) {
                 Column {
                     Text("柜门位置", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("${item.lockerId}-${item.compartmentId}", fontWeight = FontWeight.Medium)
+                    Text(item.compartmentNo, fontWeight = FontWeight.Medium)
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text("取件码", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -232,5 +265,13 @@ private fun PickupCard(
                 Text("一键开柜")
             }
         }
+    }
+}
+
+private fun mapStatusToChinese(status: String): String {
+    return when (status) {
+        "pending" -> "待取件"
+        "picked" -> "已取件"
+        else -> status
     }
 }
