@@ -81,6 +81,15 @@ fun UserMainScreen(
                 UserHomeScreen(
                     onNavigateToExpressDetail = onNavigateToExpressDetail,
                     onNavigateToSendExpress = onNavigateToSendExpress,
+                    onNavigateToStorage = {
+                        navController.navigate(UserNavItem.Storage.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                     onSessionExpired = onSessionExpired,
                     viewModel = sharedUserHomeViewModel
                 )

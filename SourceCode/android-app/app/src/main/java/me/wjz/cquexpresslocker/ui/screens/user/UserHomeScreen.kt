@@ -24,6 +24,7 @@ import me.wjz.cquexpresslocker.viewmodels.user.StorageItem
 fun UserHomeScreen(
     onNavigateToExpressDetail: (String) -> Unit,
     onNavigateToSendExpress: () -> Unit,
+    onNavigateToStorage: () -> Unit,
     onSessionExpired: () -> Unit,
     viewModel: UserHomeViewModel = viewModel()
 ) {
@@ -62,7 +63,8 @@ fun UserHomeScreen(
             UserHomeContent(
                 data = state.data,
                 onNavigateToExpressDetail = onNavigateToExpressDetail,
-                onNavigateToSendExpress = onNavigateToSendExpress
+                onNavigateToSendExpress = onNavigateToSendExpress,
+                onNavigateToStorage = onNavigateToStorage
             )
         }
         UserHomeUiState.Unauthorized -> {
@@ -80,7 +82,8 @@ fun UserHomeScreen(
 private fun UserHomeContent(
     data: UserHomeData,
     onNavigateToExpressDetail: (String) -> Unit,
-    onNavigateToSendExpress: () -> Unit
+    onNavigateToSendExpress: () -> Unit,
+    onNavigateToStorage: () -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -146,7 +149,7 @@ private fun UserHomeContent(
                 QuickActionItem(
                     icon = Icons.Default.Archive,
                     label = "寄存物品",
-                    onClick = { }
+                    onClick = onNavigateToStorage
                 )
                 QuickActionItem(
                     icon = Icons.Default.Send,
