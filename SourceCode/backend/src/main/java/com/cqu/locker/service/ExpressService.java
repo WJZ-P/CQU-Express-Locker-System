@@ -45,4 +45,29 @@ public interface ExpressService {
      * @return 寄件响应
      */
     SendExpressResponse sendExpress(SendExpressRequest request, Long userId);
+    
+    /**
+     * 创建寄存订单
+     * @param request 寄存请求
+     * @param userId 用户ID
+     * @return 寄存响应
+     */
+    CreateStorageResponse createStorage(CreateStorageRequest request, Long userId);
+    
+    /**
+     * 获取寄存列表
+     * @param userId 用户ID
+     * @return 寄存列表
+     */
+    StorageListResponse getStorageList(Long userId);
+    
+    /**
+     * 获取历史记录
+     * @param userId 用户ID
+     * @param type 记录类型：all-全部, pickup-取件, send-寄件, storage-寄存
+     * @param page 页码
+     * @param pageSize 每页大小
+     * @return 历史记录列表
+     */
+    HistoryResponse getHistory(Long userId, String type, Integer page, Integer pageSize);
 }

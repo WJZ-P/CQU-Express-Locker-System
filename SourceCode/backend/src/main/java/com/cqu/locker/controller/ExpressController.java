@@ -112,6 +112,56 @@ public class ExpressController {
             return Result.error(e.getMessage());
         }
     }
+    
+    /**
+     * 创建寄存订单
+     */
+    @PostMapping("/v1/storage/create")
+    public Result<CreateStorageResponse> createStorage(
+            @Valid @RequestBody CreateStorageRequest request,
+            HttpServletRequest httpRequest) {
+        try {
+            Long userId = (Long) httpRequest.getAttribute("userId");
+            CreateStorageResponse response = expressService.createStorage(request, userId);
+            return Result.success(response);
+        } catch (Exception e) {
+            log.error("创建寄存订单失败", e);
+            return Result.error(e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取寄存列表
+     */
+    @GetMapping("/v1/storage/list")
+    public Result<StorageListResponse> getStorageList(HttpServletRequest request) {
+        try {
+            Long userId = (Long) request.getAttribute("userId");
+            StorageListResponse response = expressService.getStorageList(userId);
+            return Result.success(response);
+        } catch (Exception e) {
+            log.error("获取寄存列表失败", e);
+            return Result.error(e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取历史记录
+     */
+    @GetMapping("/v1/history")
+    public Result<HistoryResponse> getHistory(HttpServletRequest request, 
+                                             @RequestParam(defaultValue = "all") String type, 
+                                             @RequestParam(defaultValue = "1") Integer page, 
+                                             @RequestParam(defaultValue = "20") Integer pageSize) {
+        try {
+            Long userId = (Long) request.getAttribute("userId");
+            HistoryResponse response = expressService.getHistory(userId, type, page, pageSize);
+            return Result.success(response);
+        } catch (Exception e) {
+            log.error("获取历史记录失败", e);
+            return Result.error(e.getMessage());
+        }
+    }
 
     // --- 旧版接口 ---
 

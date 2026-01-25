@@ -111,4 +111,18 @@ CREATE TABLE `iot_power_stats` (
 -- 初始数据
 -- 管理员账号：手机号 13800138000，密码 123456（已MD5加密）
 INSERT INTO `sys_user` (`username`, `password`, `phone`, `role`) VALUES ('admin', 'e10adc3949ba59abbe56e057f20f883e', '13800138000', 0);
+-- 测试用户：手机号 13800138001，密码 123456
+INSERT INTO `sys_user` (`username`, `password`, `phone`, `role`) VALUES ('testuser', 'e10adc3949ba59abbe56e057f20f883e', '13800138001', 1);
+-- 测试快递员：手机号 13800138002，密码 123456
+INSERT INTO `sys_user` (`username`, `password`, `phone`, `role`) VALUES ('testcourier', 'e10adc3949ba59abbe56e057f20f883e', '13800138002', 2);
+
+-- 快递员信息
+INSERT INTO `sys_courier` (`user_id`, `company`, `employee_id`) VALUES (3, '顺丰速运', 'SF123456');
+
+-- 测试快递柜和格口数据
+INSERT INTO `iot_locker` (`serial_no`, `location`, `ip_address`, `status`) VALUES ('LOCKER001', '测试位置1', '192.168.1.100', 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'A01', 1, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'A02', 2, 0, 1);
+INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `is_locked`) VALUES (1, 'A03', 3, 0, 1);
+
 INSERT INTO `sys_config` (`param_key`, `param_value`, `description`) VALUES ('sys_name', '快递柜综合应用系统', '系统名称'), ('pickup_timeout', '24', '取件超时时间(h)');

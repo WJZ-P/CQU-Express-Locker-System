@@ -7,9 +7,11 @@ import com.cqu.locker.entity.BusOrder;
 import com.cqu.locker.entity.IotBox;
 import com.cqu.locker.entity.IotLocker;
 import com.cqu.locker.entity.dto.*;
+import com.cqu.locker.entity.SysUser;
 import com.cqu.locker.mapper.BusOrderMapper;
 import com.cqu.locker.mapper.IotBoxMapper;
 import com.cqu.locker.mapper.IotLockerMapper;
+import com.cqu.locker.mapper.SysUserMapper;
 import com.cqu.locker.service.ExpressService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,9 @@ public class ExpressServiceImpl implements ExpressService {
     
     @Autowired
     private IotLockerMapper lockerMapper;
+    
+    @Autowired
+    private SysUserMapper userMapper;
     
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     
@@ -261,5 +266,230 @@ public class ExpressServiceImpl implements ExpressService {
             return phone;
         }
         return phone.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2");
+    }
+    
+    @Override
+    @Transactional
+    public CreateStorageResponse createStorage(CreateStorageRequest request, Long userId) {
+        // 将字符串lockerId转换为Long类型
+        Long lockerId = Long.parseLong(request.getLockerId());
+        
+        // 将字符串compartmentSize转换为数字类型
+        Integer size = 2; // 默认中等
+        switch (request.getCompartmentSize()) {
+            case "small":
+                size = 1;
+                break;
+            case "large":
+                size = 3;
+                break;
+        }
+        
+        // 查找对应尺寸的空闲格口
+        LambdaQueryWrapper<IotBox> boxWrapper = new LambdaQueryWrapper<>();
+        boxWrapper.eq(IotBox::getLockerId, lockerId)
+                .eq(IotBox::getSize, size)
+                .eq(IotBox::getStatus, 0); // 0-空闲
+        
+        IotBox box = boxMapper.selectOne(boxWrapper);
+        if (box == null) {
+            throw new RuntimeException("该尺寸的空闲格口已用完");
+        }
+        
+        // 生成寄存订单号
+        String orderNo = "ST" + DateUtil.format(LocalDateTime.now(), "yyyyMMddHHmmss") + RandomUtil.randomNumbers(3);
+        
+        // 生成6位取件码
+        String pickupCode = RandomUtil.randomNumbers(6);
+        
+        // 计算过期时间
+        LocalDateTime expireTime = LocalDateTime.now().plusHours(request.getDuration());
+        
+        // 计算费用（简单计算：小格口0.5元/小时，中格口1元/小时，大格口1.5元/小时）
+        double pricePerHour = 1.0;
+        switch (size) {
+            case 1:
+                pricePerHour = 0.5;
+                break;
+            case 3:
+                pricePerHour = 1.5;
+                break;
+        }
+        double fee = pricePerHour * request.getDuration();
+        
+        // 获取用户信息
+        SysUser user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        
+        // 创建寄存订单
+        BusOrder order = new BusOrder();
+        order.setOrderNo(orderNo);
+        order.setType(3); // 3-寄存
+        order.setPickupCode(pickupCode);
+        order.setBoxId(box.getId());
+        order.setUserId(userId);
+        order.setReceiverPhone(user.getPhone());
+        order.setStatus(0); // 0-待取
+        order.setCreateTime(LocalDateTime.now());
+        
+        orderMapper.insert(order);
+        
+        // 更新格口状态为占用
+        box.setStatus(1); // 1-占用
+        boxMapper.updateById(box);
+        
+        // 获取快递柜名称
+        IotLocker locker = lockerMapper.selectById(lockerId);
+        
+        return CreateStorageResponse.builder()
+                .storageId(orderNo)
+                .compartmentNo(box.getBoxNo())
+                .openCode(pickupCode)
+                .expireTime(expireTime.format(formatter))
+                .fee(fee)
+                .build();
+    }
+    
+    @Override
+    public StorageListResponse getStorageList(Long userId) {
+        // 查询用户的所有寄存订单
+        LambdaQueryWrapper<BusOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(BusOrder::getUserId, userId)
+                .eq(BusOrder::getType, 3) // 3-寄存
+                .orderByDesc(BusOrder::getCreateTime);
+        
+        List<BusOrder> orders = orderMapper.selectList(wrapper);
+        
+        List<StorageListResponse.StorageItem> items = new ArrayList<>();
+        for (BusOrder order : orders) {
+            // 获取格口信息
+            IotBox box = boxMapper.selectById(order.getBoxId());
+            if (box == null) continue;
+            
+            // 获取快递柜信息
+            IotLocker locker = lockerMapper.selectById(box.getLockerId());
+            if (locker == null) continue;
+            
+            // 格口尺寸映射
+            String sizeStr = "medium";
+            if (box.getSize() == 1) sizeStr = "small";
+            else if (box.getSize() == 3) sizeStr = "large";
+            
+            // 订单状态映射
+            String statusStr = "active";
+            if (order.getStatus() == 1) statusStr = "completed";
+            else if (order.getStatus() == 2) statusStr = "expired";
+            
+            // 计算过期时间
+            LocalDateTime expireTime = order.getCreateTime().plusHours(24); // 默认24小时
+            
+            StorageListResponse.StorageItem item = StorageListResponse.StorageItem.builder()
+                    .storageId(order.getOrderNo())
+                    .lockerName(locker.getLocation())
+                    .compartmentNo(box.getBoxNo())
+                    .compartmentSize(sizeStr)
+                    .status(statusStr)
+                    .createTime(order.getCreateTime().format(formatter))
+                    .expireTime(expireTime.format(formatter))
+                    .openCode(order.getPickupCode())
+                    .itemDescription("") // 数据库中没有该字段，使用默认值
+                    .build();
+            items.add(item);
+        }
+        
+        return StorageListResponse.builder()
+                .total(items.size())
+                .list(items)
+                .build();
+    }
+    
+    @Override
+    public HistoryResponse getHistory(Long userId, String type, Integer page, Integer pageSize) {
+        // 构建查询条件
+        LambdaQueryWrapper<BusOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(BusOrder::getUserId, userId)
+                .orderByDesc(BusOrder::getCreateTime);
+        
+        // 根据类型过滤
+        if (!"all".equals(type)) {
+            switch (type) {
+                case "pickup":
+                    wrapper.eq(BusOrder::getType, 1); // 1-投递（取件）
+                    break;
+                case "send":
+                    wrapper.eq(BusOrder::getType, 2); // 2-寄件
+                    break;
+                case "storage":
+                    wrapper.eq(BusOrder::getType, 3); // 3-寄存
+                    break;
+            }
+        }
+        
+        // 查询总数
+        Integer total = orderMapper.selectCount(wrapper).intValue();
+        
+        // 计算分页参数
+        if (page == null || page < 1) page = 1;
+        if (pageSize == null || pageSize < 1) pageSize = 20;
+        
+        // 分页查询
+        int offset = (page - 1) * pageSize;
+        List<BusOrder> orders = orderMapper.selectList(wrapper.last("LIMIT " + offset + ", " + pageSize));
+        
+        List<HistoryResponse.HistoryItem> items = new ArrayList<>();
+        for (BusOrder order : orders) {
+            // 获取格口信息
+            IotBox box = boxMapper.selectById(order.getBoxId());
+            if (box == null) continue;
+            
+            // 获取快递柜信息
+            IotLocker locker = lockerMapper.selectById(box.getLockerId());
+            if (locker == null) continue;
+            
+            // 记录类型映射
+            String typeStr = "";
+            String title = "";
+            switch (order.getType()) {
+                case 1:
+                    typeStr = "pickup";
+                    title = "顺丰速运 " + order.getTrackingNo(); // 模拟快递公司
+                    break;
+                case 2:
+                    typeStr = "send";
+                    title = "寄件至北京市海淀区";
+                    break;
+                case 3:
+                    typeStr = "storage";
+                    title = "临时寄存";
+                    break;
+            }
+            
+            // 订单状态映射
+            String statusStr = "completed";
+            if (order.getStatus() == 0) statusStr = "pending";
+            else if (order.getStatus() == 2) statusStr = "expired";
+            
+            HistoryResponse.HistoryItem item = HistoryResponse.HistoryItem.builder()
+                    .recordId(order.getId().toString())
+                    .type(typeStr)
+                    .title(title)
+                    .lockerName(locker.getLocation())
+                    .compartmentNo(box.getBoxNo())
+                    .time(order.getCreateTime().format(formatter))
+                    .status(statusStr)
+                    .company("顺丰速运") // 模拟快递公司
+                    .trackingNo(order.getTrackingNo())
+                    .build();
+            items.add(item);
+        }
+        
+        return HistoryResponse.builder()
+                .total(total)
+                .page(page)
+                .pageSize(pageSize)
+                .list(items)
+                .build();
     }
 }
