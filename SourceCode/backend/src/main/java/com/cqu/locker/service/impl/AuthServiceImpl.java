@@ -44,11 +44,6 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("用户不存在");
         }
         
-        // Web端只允许管理员登录（role=0）
-        if (user.getRole() != 0) {
-            throw new RuntimeException("权限不足，Web管理平台仅限管理员登录");
-        }
-        
         // 验证密码（使用MD5加密）
         String encryptedPassword = DigestUtil.md5Hex(request.getPassword());
         if (!user.getPassword().equals(encryptedPassword)) {
