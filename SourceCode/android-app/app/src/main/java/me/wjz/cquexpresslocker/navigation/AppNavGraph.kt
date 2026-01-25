@@ -66,16 +66,25 @@ fun AppNavGraph(
         }
         
         // 用户主页（含底部导航）
-        composable(AppRoutes.USER_MAIN) {
+        composable(AppRoutes.USER_MAIN) { backStackEntry ->
+            // 监听来自 EditProfileScreen 的刷新信号
+            val refreshProfile = backStackEntry.savedStateHandle.get<Boolean>("refresh") == true
+            
             UserMainScreen(
                 onNavigateToExpressDetail = { expressId ->
                     navController.navigate("user_express_detail/$expressId")
+                },
+                onNavigateToPickup = { expressId ->
+                    navController.navigate("user_pickup/$expressId")
                 },
                 onNavigateToSendExpress = {
                     navController.navigate(AppRoutes.USER_SEND_EXPRESS)
                 },
                 onNavigateToHistory = {
                     navController.navigate(AppRoutes.USER_HISTORY)
+                },
+                onNavigateToEditProfile = { nickname ->
+                    navController.navigate("user_edit_profile/$nickname")
                 },
                 onLogout = {
                     navController.navigate(AppRoutes.LOGIN) {
@@ -86,6 +95,10 @@ fun AppNavGraph(
                     navController.navigate(AppRoutes.LOGIN) {
                         popUpTo(AppRoutes.USER_MAIN) { inclusive = true }
                     }
+                },
+                shouldRefreshProfile = refreshProfile,
+                onProfileRefreshed = {
+                    backStackEntry.savedStateHandle.set("refresh", false)
                 }
             )
         }
@@ -93,6 +106,34 @@ fun AppNavGraph(
         // 用户发快递
         composable(AppRoutes.USER_SEND_EXPRESS) {
             SendExpressScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onSendExpressSuccess = { orderId ->
+                    navController.navigate(AppRoutes.USER_MAIN) {
+                        popUpTo(AppRoutes.USER_SEND_EXPRESS) { inclusive = true }
+                    }
+                }
+            )
+        }
+        
+        // 用户快递详情
+        composable(AppRoutes.USER_EXPRESS_DETAIL) { backStackEntry ->
+            val expressId = backStackEntry.arguments?.getString("expressId") ?: ""
+            ExpressDetailScreen(
+                expressId = expressId,
+                onNavigateToPickup = { navController.navigate("user_pickup/$expressId") },
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        
+        // 用户取件验证
+        composable("user_pickup/{expressId}") { backStackEntry ->
+            val expressId = backStackEntry.arguments?.getString("expressId") ?: ""
+            PickupScreen(
+                expressId = expressId,
+                onPickupSuccess = { _, _ ->
+                    navController.popBackStack(AppRoutes.USER_EXPRESS_DETAIL, inclusive = true)
+                    navController.navigate(AppRoutes.USER_MAIN)
+                },
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -101,6 +142,19 @@ fun AppNavGraph(
         composable(AppRoutes.USER_HISTORY) {
             HistoryScreen(
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        
+        // 用户编辑资料
+        composable(AppRoutes.USER_EDIT_PROFILE) { backStackEntry ->
+            val nickname = backStackEntry.arguments?.getString("nickname") ?: ""
+            EditProfileScreen(
+                currentNickname = nickname,
+                onNavigateBack = { navController.popBackStack() },
+                onUpdateSuccess = { 
+                    navController.previousBackStackEntry?.savedStateHandle?.set("refresh", true)
+                    navController.popBackStack()
+                }
             )
         }
         

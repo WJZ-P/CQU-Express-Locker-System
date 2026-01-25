@@ -78,6 +78,7 @@ class UserHomeViewModel : ViewModel() {
 
                 val data = UserHomeData(
                     userName = userName,
+                    phoneNumber = profileResponse.data.phone,
                     numOfPackages = pendingResponse.data.total,
                     pendingExpressList = pendingList,
                     recentStorage = recentStorage
@@ -133,6 +134,7 @@ sealed class UserHomeUiState {
  */
 data class UserHomeData(
     val userName: String,
+    val phoneNumber: String,
     val numOfPackages: Int,
     val pendingExpressList: List<ExpressItem>,
     val recentStorage: StorageItem?
