@@ -129,7 +129,11 @@ public class AuthServiceImpl implements AuthService {
         
         // 创建用户
         SysUser user = new SysUser();
-        user.setUsername(request.getPhone()); // 默认用户名为手机号
+        String username = request.getUsername();
+        if (username == null || username.isBlank()) {
+            username = request.getPhone();
+        }
+        user.setUsername(username);
         user.setPassword(DigestUtil.md5Hex(request.getPassword())); // MD5加密
         user.setPhone(request.getPhone());
         

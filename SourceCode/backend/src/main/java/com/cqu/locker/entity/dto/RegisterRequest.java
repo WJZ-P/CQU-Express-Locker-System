@@ -23,4 +23,9 @@ public class RegisterRequest {
     @NotBlank(message = "用户类型不能为空")
     @Pattern(regexp = "^(user|courier)$", message = "用户类型只能是user或courier")
     private String userType;
+    
+    /**
+     * 用户名（可选，未传则默认使用手机号）
+     */
+    private String username;
 }
