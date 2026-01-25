@@ -72,7 +72,7 @@ public class ExpressServiceImpl implements ExpressService {
             ExpressPendingResponse.ExpressItem item = ExpressPendingResponse.ExpressItem.builder()
                     .expressId(order.getOrderNo())
                     .trackingNo(order.getTrackingNo())
-                    .company("快递公司") // 数据库中没有该字段，使用默认值
+                    .company(mapCompany(order.getTrackingNo()))
                     .lockerName(locker.getLocation())
                     .compartmentNo(box.getBoxNo())
                     .status("pending")
@@ -124,7 +124,7 @@ public class ExpressServiceImpl implements ExpressService {
         return ExpressDetailResponse.builder()
                 .expressId(order.getOrderNo())
                 .trackingNo(order.getTrackingNo())
-                .company("快递公司") // 默认值
+                .company(mapCompany(order.getTrackingNo()))
                 .lockerName(locker.getLocation())
                 .lockerAddress(locker.getLocation())
                 .compartmentNo(box.getBoxNo())
@@ -256,6 +256,31 @@ public class ExpressServiceImpl implements ExpressService {
                 .estimatedPickupTime(estimatedTime.format(formatter))
                 .estimatedFee(fee)
                 .build();
+    }
+    
+    /**
+     * 根据追踪单号前缀映射快递公司名称
+     */
+    private String mapCompany(String trackingNo) {
+        if (trackingNo == null || trackingNo.isEmpty()) {
+            return "未知快递";
+        }
+        
+        String upperTrackingNo = trackingNo.toUpperCase();
+        
+        if (upperTrackingNo.startsWith("SF")) {
+            return "顺丰快递";
+        } else if (upperTrackingNo.startsWith("YT")) {
+            return "圆通快递";
+        } else if (upperTrackingNo.startsWith("ZTO")) {
+            return "中通快递";
+        } else if (upperTrackingNo.startsWith("STO")) {
+            return "申通快递";
+        } else if (upperTrackingNo.startsWith("JD")) {
+            return "京东快递";
+        } else {
+            return "未知快递";
+        }
     }
     
     /**
