@@ -58,7 +58,8 @@ public class AuthServiceImpl implements AuthService {
         // 如果是快递员，检查快递员状态
         if (user.getRole() == 2) {
             LambdaQueryWrapper<SysCourier> courierWrapper = new LambdaQueryWrapper<>();
-            courierWrapper.eq(SysCourier::getUserId, user.getId());
+            courierWrapper.eq(SysCourier::getUserId, user.getId())
+                    .last("limit 1");
             SysCourier courier = courierMapper.selectOne(courierWrapper);
             if (courier != null && courier.getStatus() != null && courier.getStatus() == 0) {
                 throw new RuntimeException("快递员账号已离职，无法登录");
