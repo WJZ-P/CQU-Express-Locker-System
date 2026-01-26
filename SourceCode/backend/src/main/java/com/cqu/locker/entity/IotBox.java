@@ -33,6 +33,11 @@ public class IotBox {
     private Integer size;
     
     /**
+     * 格口类型：small/medium/large
+     */
+    private String boxType;
+    
+    /**
      * 业务状态：0-空闲，1-占用，2-故障
      */
     private Integer status;

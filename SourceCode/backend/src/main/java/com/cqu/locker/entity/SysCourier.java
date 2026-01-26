@@ -15,6 +15,10 @@ public class SysCourier {
      * 快递员姓名
      */
     private String name;
+    /**
+     * 手机号
+     */
+    private String phone;
     private String company;
     private String employeeId;
     /**

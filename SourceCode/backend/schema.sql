@@ -162,32 +162,7 @@ CREATE TABLE `iot_power_stats` (
   KEY `idx_locker_id` (`locker_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='电量统计表';
 
--- 3.9 快递员-快递柜绑定表 (rel_courier_locker)
-DROP TABLE IF EXISTS `rel_courier_locker`;
-CREATE TABLE `rel_courier_locker` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `courier_id` bigint(20) NOT NULL COMMENT '快递员ID（关联sys_courier.id）',
-  `locker_id` bigint(20) NOT NULL COMMENT '快递柜ID（关联iot_locker.id）',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_courier_locker` (`courier_id`, `locker_id`),
-  KEY `idx_courier_id` (`courier_id`),
-  KEY `idx_locker_id` (`locker_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='快递员-快递柜绑定表';
 
--- 3.10 用户-快递柜绑定表 (rel_user_locker)
-DROP TABLE IF EXISTS `rel_user_locker`;
-CREATE TABLE `rel_user_locker` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `user_id` bigint(20) NOT NULL COMMENT '用户ID（关联sys_user.id）',
-  `locker_id` bigint(20) NOT NULL COMMENT '快递柜ID（关联iot_locker.id）',
-  `is_default` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否默认快递柜：0-否，1-是',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_user_locker` (`user_id`, `locker_id`),
-  KEY `idx_user_id` (`user_id`),
-  KEY `idx_locker_id` (`locker_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户-快递柜绑定表';
 
 -- =====================================================
 -- 初始数据
@@ -276,12 +251,6 @@ INSERT INTO `iot_box` (`locker_id`, `box_no`, `size`, `status`, `enabled`, `is_l
 (3, 'B02', 2, 0, 1, 1),
 (3, 'C01', 3, 0, 1, 1),
 (3, 'C02', 3, 0, 1, 1);
-
--- 快递员-快递柜绑定关系
-INSERT INTO `rel_courier_locker` (`courier_id`, `locker_id`) VALUES 
-(1, 1), (1, 2),  -- 测试快递员绑定快递柜1、2
-(2, 1), (2, 2), (2, 3),  -- 张三绑定全部快递柜
-(3, 2), (3, 3);  -- 李四绑定快递柜2、3
 
 -- 系统配置
 INSERT INTO `sys_config` (`param_key`, `param_value`, `description`) VALUES 

@@ -17,6 +17,14 @@ public class BusOrder {
     private Long id;
     private String orderNo;
     /**
+     * 快递单号（兼容expressNo字段）
+     */
+    private String expressNo;
+    /**
+     * 快递柜ID（通过boxId关联查询）
+     */
+    private Long lockerId;
+    /**
      * 类型：1-投递，2-寄件，3-寄存
      */
     private Integer type; 
@@ -71,6 +79,10 @@ public class BusOrder {
      */
     private LocalDateTime notificationTime;
     private LocalDateTime createTime;
+    /**
+     * 取件时间
+     */
+    private LocalDateTime pickupTime;
     private LocalDateTime finishTime;
     private LocalDateTime updateTime;
 }

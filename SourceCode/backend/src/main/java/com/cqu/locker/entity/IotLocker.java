@@ -21,14 +21,29 @@ public class IotLocker {
     private Long id;
 
     /**
-     * 设备序列号
+     * 设备序列号/快递柜编号
      */
     private String serialNo;
+    
+    /**
+     * 别名（兼容lockerNo字段）
+     */
+    private String lockerNo;
 
     /**
      * 快递柜名称
      */
     private String name;
+    
+    /**
+     * 总格口数
+     */
+    private Integer totalBox;
+    
+    /**
+     * 可用格口数
+     */
+    private Integer availableBox;
 
     /**
      * 部署地址
