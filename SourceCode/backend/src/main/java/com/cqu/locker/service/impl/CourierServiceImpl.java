@@ -53,7 +53,8 @@ public class CourierServiceImpl implements CourierService {
     public CourierProfileResponse getCourierProfile(Long courierId) {
         // 查询快递员信息（根据userId字段查询，而不是id字段）
         LambdaQueryWrapper<SysCourier> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysCourier::getUserId, courierId);
+        wrapper.eq(SysCourier::getUserId, courierId)
+                .last("limit 1");
         SysCourier courier = courierMapper.selectOne(wrapper);
         if (courier == null) {
             throw new RuntimeException("快递员不存在");
