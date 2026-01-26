@@ -1,26 +1,36 @@
 package com.cqu.locker.entity;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * 电量统计实体类
+ */
 @Data
-@TableName("sys_courier")
-public class SysCourier {
+@TableName("iot_power_stats")
+public class IotPowerStats {
     @TableId(type = IdType.AUTO)
     private Long id;
-    private Long userId;
+    
     /**
-     * 快递员姓名
+     * 快递柜ID
      */
-    private String name;
-    private String company;
-    private String employeeId;
+    private Long lockerId;
+    
     /**
-     * 状态：0-离职，1-在职
+     * 用电量(kWh)
      */
-    private Integer status;
+    private BigDecimal powerUsage;
+    
+    /**
+     * 记录日期
+     */
+    private LocalDate recordDate;
+    
     private LocalDateTime createTime;
-    private LocalDateTime updateTime;
 }

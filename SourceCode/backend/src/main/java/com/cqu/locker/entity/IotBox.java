@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -32,14 +33,46 @@ public class IotBox {
     private Integer size;
     
     /**
-     * 状态：0-空闲，1-占用，2-故障
+     * 业务状态：0-空闲，1-占用，2-故障
      */
     private Integer status;
+
+    /**
+     * 是否启用：0-禁用，1-启用
+     */
+    private Integer enabled;
     
     /**
      * 门锁状态：0-开，1-关
      */
     private Integer isLocked;
+
+    /**
+     * 压力传感器数值(kg)
+     */
+    private BigDecimal pressure;
+
+    /**
+     * 格口内温度(°C)
+     */
+    private BigDecimal temperature;
+
+    /**
+     * 格口内湿度(%)
+     */
+    private BigDecimal humidity;
+
+    /**
+     * 故障原因
+     */
+    private String faultReason;
+
+    /**
+     * 故障时间
+     */
+    private LocalDateTime faultTime;
     
     private LocalDateTime createTime;
+
+    private LocalDateTime updateTime;
 }

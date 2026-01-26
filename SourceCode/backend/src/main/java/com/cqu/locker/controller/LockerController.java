@@ -26,12 +26,12 @@ public class LockerController {
     private IotBoxService boxService;
 
     /**
-     * 获取所有快递柜列表
+     * 获取所有快递柜列表（仅返回启用的快递柜）
      * @return 快递柜列表数据
      */
     @GetMapping("/api/v1/locker/list")
     public Result<List<IotLocker>> list() {
-        return Result.success(lockerService.list());
+        return Result.success(lockerService.listEnabled());
     }
 
     /**
@@ -81,11 +81,11 @@ public class LockerController {
     // --- 格口管理接口 ---
 
     /**
-     * 获取快递柜格口列表
+     * 获取快递柜格口列表（仅返回启用的格口）
      */
     @GetMapping("/{id}/compartments")
     public Result<List<IotBox>> getCompartments(@PathVariable Long id) {
-        return Result.success(boxService.getByLockerId(id));
+        return Result.success(boxService.getEnabledByLockerId(id));
     }
 
     /**

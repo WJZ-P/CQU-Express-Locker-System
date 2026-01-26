@@ -1,26 +1,34 @@
 package com.cqu.locker.entity;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+/**
+ * 用户-快递柜绑定关系实体类
+ */
 @Data
-@TableName("sys_courier")
-public class SysCourier {
+@TableName("rel_user_locker")
+public class RelUserLocker {
     @TableId(type = IdType.AUTO)
     private Long id;
+    
+    /**
+     * 用户ID
+     */
     private Long userId;
+    
     /**
-     * 快递员姓名
+     * 快递柜ID
      */
-    private String name;
-    private String company;
-    private String employeeId;
+    private Long lockerId;
+    
     /**
-     * 状态：0-离职，1-在职
+     * 是否默认快递柜
      */
-    private Integer status;
+    private Integer isDefault;
+    
     private LocalDateTime createTime;
-    private LocalDateTime updateTime;
 }
