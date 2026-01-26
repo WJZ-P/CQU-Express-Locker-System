@@ -6,6 +6,35 @@
   <component name="ChangeListManager">
     <list default="true" id="313e9730-5bc8-450f-840d-fa1629f565be" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/controller/admin/AdminStatisticsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/controller/admin/AdminStatisticsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/BusOrder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/BusOrder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/IotBox.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/IotBox.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/IotLocker.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/IotLocker.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/SysConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/SysConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/SysCourier.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/SysCourier.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/dto/admin/DashboardStatsResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/dto/admin/DashboardStatsResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/AdminStatisticsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/AdminStatisticsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/impl/AdminCompartmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/impl/AdminCompartmentServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/impl/AdminExpressServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/impl/AdminExpressServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/impl/AdminStatisticsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/impl/AdminStatisticsServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/BusOrder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/BusOrder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/IotBox.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/IotBox.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/IotLocker.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/IotLocker.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysCourier.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysCourier.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/api/express.js" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/api/express.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/api/locker.js" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/api/locker.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/api/statistics.js" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/api/statistics.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/api/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/api/user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/dashboard/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/dashboard/index.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/express/list.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/express/list.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/express/storage.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/express/storage.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/locker/compartment.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/locker/compartment.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/locker/list.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/locker/list.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/statistics/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/statistics/index.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/system/config.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/system/config.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/user/courier.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/user/courier.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/user/list.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/user/list.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,8 +59,14 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "git-widget-placeholder": "feature/1.0.0/zsc",
+    "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/63167/Desktop/github/CQU-Express-Locker-System/SourceCode/backend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
     "project.structure.last.edited": "SDK",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
@@ -41,6 +76,8 @@
 }]]></component>
   <component name="RunManager" selected="应用程序.LockerApplication">
     <configuration name="LockerApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="ALTERNATIVE_JRE_PATH" value="ms-17" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="com.cqu.locker.LockerApplication" />
       <module name="locker-system" />
       <extension name="coverage">
@@ -52,6 +89,15 @@
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType">
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <option name="filePath" />
+      <method v="2" />
     </configuration>
     <configuration name="LockerApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="locker-system" />
@@ -84,6 +130,7 @@
       <workItem from="1768736427103" duration="1645000" />
       <workItem from="1768741753536" duration="122000" />
       <workItem from="1769052811707" duration="1538000" />
+      <workItem from="1769404531098" duration="1712000" />
     </task>
     <servers />
   </component>

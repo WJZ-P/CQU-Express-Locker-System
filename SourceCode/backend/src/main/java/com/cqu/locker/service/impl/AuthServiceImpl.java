@@ -44,10 +44,25 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("用户不存在");
         }
         
+        // 检查用户状态（新增：支持禁用用户）
+        if (user.getStatus() != null && user.getStatus() == 0) {
+            throw new RuntimeException("账号已被禁用，请联系管理员");
+        }
+        
         // 验证密码（使用MD5加密）
         String encryptedPassword = DigestUtil.md5Hex(request.getPassword());
         if (!user.getPassword().equals(encryptedPassword)) {
             throw new RuntimeException("密码错误");
+        }
+        
+        // 如果是快递员，检查快递员状态
+        if (user.getRole() == 2) {
+            LambdaQueryWrapper<SysCourier> courierWrapper = new LambdaQueryWrapper<>();
+            courierWrapper.eq(SysCourier::getUserId, user.getId());
+            SysCourier courier = courierMapper.selectOne(courierWrapper);
+            if (courier != null && courier.getStatus() != null && courier.getStatus() == 0) {
+                throw new RuntimeException("快递员账号已离职，无法登录");
+            }
         }
         
         // 根据角色确定用户类型
@@ -66,14 +81,23 @@ public class AuthServiceImpl implements AuthService {
                 userType = "user";
         }
         
+        // 更新最后登录时间
+        SysUser updateUser = new SysUser();
+        updateUser.setId(user.getId());
+        updateUser.setLastLoginTime(LocalDateTime.now());
+        userMapper.updateById(updateUser);
+        
         // 生成token
         String token = JwtUtil.generateToken(user.getId(), userType);
+        
+        // 优先使用nickname，如果为空则使用username
+        String displayName = user.getNickname() != null ? user.getNickname() : user.getUsername();
         
         return LoginResponse.builder()
                 .token(token)
                 .userId(user.getId().toString())
                 .userType(userType)
-                .nickname(user.getUsername())
+                .nickname(displayName)
                 .build();
     }
     

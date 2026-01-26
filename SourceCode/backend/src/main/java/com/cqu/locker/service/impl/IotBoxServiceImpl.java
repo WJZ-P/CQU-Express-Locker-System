@@ -17,6 +17,14 @@ public class IotBoxServiceImpl extends ServiceImpl<IotBoxMapper, IotBox> impleme
                 .eq(IotBox::getLockerId, lockerId)
                 .orderByAsc(IotBox::getBoxNo));
     }
+    
+    @Override
+    public List<IotBox> getEnabledByLockerId(Long lockerId) {
+        return this.list(new LambdaQueryWrapper<IotBox>()
+                .eq(IotBox::getLockerId, lockerId)
+                .eq(IotBox::getEnabled, 1)
+                .orderByAsc(IotBox::getBoxNo));
+    }
 
     @Override
     public boolean openDoor(Long id) {

@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard">
     <!-- 统计卡片 -->
-    <el-row :gutter="20" class="stats-row">
+    <el-row :gutter="20" class="stats-row" v-loading="statsLoading">
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
@@ -17,7 +17,7 @@
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
             <div class="stat-info">
-              <div class="stat-value">{{ stats.expressCount }}</div>
+              <div class="stat-value">{{ stats.todayOrderCount }}</div>
               <div class="stat-label">今日快递数</div>
             </div>
             <el-icon class="stat-icon" style="color: #67C23A"><Postcard /></el-icon>
@@ -43,6 +43,54 @@
               <div class="stat-label">快递员数量</div>
             </div>
             <el-icon class="stat-icon" style="color: #F56C6C"><Avatar /></el-icon>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- 第二行统计卡片 -->
+    <el-row :gutter="20" class="stats-row">
+      <el-col :span="6">
+        <el-card shadow="hover" class="stat-card stat-card-secondary">
+          <div class="stat-content">
+            <div class="stat-info">
+              <div class="stat-value">{{ stats.pendingOrderCount }}</div>
+              <div class="stat-label">待取件订单</div>
+            </div>
+            <el-icon class="stat-icon" style="color: #E6A23C"><Clock /></el-icon>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover" class="stat-card stat-card-secondary">
+          <div class="stat-content">
+            <div class="stat-info">
+              <div class="stat-value">{{ stats.overtimeOrderCount }}</div>
+              <div class="stat-label">超时订单</div>
+            </div>
+            <el-icon class="stat-icon" style="color: #F56C6C"><Warning /></el-icon>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover" class="stat-card stat-card-secondary">
+          <div class="stat-content">
+            <div class="stat-info">
+              <div class="stat-value">{{ stats.availableBoxCount }}</div>
+              <div class="stat-label">空闲格口</div>
+            </div>
+            <el-icon class="stat-icon" style="color: #67C23A"><Grid /></el-icon>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover" class="stat-card stat-card-secondary">
+          <div class="stat-content">
+            <div class="stat-info">
+              <div class="stat-value">{{ stats.faultBoxCount }}</div>
+              <div class="stat-label">故障格口</div>
+            </div>
+            <el-icon class="stat-icon" style="color: #909399"><CircleClose /></el-icon>
           </div>
         </el-card>
       </el-col>
@@ -75,22 +123,31 @@
           <template #header>
             <span>快递柜实时状态</span>
           </template>
-          <el-table :data="lockerList" style="width: 100%">
-            <el-table-column prop="id" label="柜号" width="80" />
+          <el-table :data="lockerList" style="width: 100%" v-loading="lockerLoading">
+            <el-table-column prop="id" label="ID" width="80" />
+            <el-table-column prop="name" label="柜名" width="120" />
             <el-table-column prop="location" label="位置" />
-            <el-table-column prop="totalCompartments" label="仓门数" width="100" />
-            <el-table-column prop="usedCompartments" label="已用" width="80" />
-            <el-table-column prop="electricity" label="今日用电(kWh)" width="120" />
-            <el-table-column prop="status" label="状态" width="100">
+            <el-table-column prop="totalBox" label="格口数" width="100" />
+            <el-table-column prop="availableBox" label="空闲" width="80" />
+            <el-table-column label="使用率" width="120">
               <template #default="{ row }">
-                <el-tag :type="row.status === '正常' ? 'success' : 'danger'">
-                  {{ row.status }}
+                <el-progress 
+                  :percentage="row.totalBox > 0 ? Math.round((row.totalBox - row.availableBox) / row.totalBox * 100) : 0" 
+                  :stroke-width="10"
+                  :color="getUsageColor"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column prop="enabled" label="状态" width="100">
+              <template #default="{ row }">
+                <el-tag :type="row.enabled === 1 ? 'success' : 'danger'">
+                  {{ row.enabled === 1 ? '正常' : '禁用' }}
                 </el-tag>
               </template>
             </el-table-column>
             <el-table-column label="操作" width="150">
-              <template #default>
-                <el-button type="primary" link>查看详情</el-button>
+              <template #default="{ row }">
+                <el-button type="primary" link @click="goToCompartment(row.id)">查看详情</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -101,54 +158,126 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
+import { getDashboardStats, getTrendData, getDistributionData } from '@/api/statistics'
+import { getLockerList } from '@/api/locker'
 
+const router = useRouter()
 const lineChartRef = ref()
 const pieChartRef = ref()
+const statsLoading = ref(false)
+const lockerLoading = ref(false)
 
 const stats = reactive({
-  lockerCount: 128,
-  expressCount: 1256,
-  userCount: 8964,
-  courierCount: 156
+  lockerCount: 0,
+  todayOrderCount: 0,
+  userCount: 0,
+  courierCount: 0,
+  pendingOrderCount: 0,
+  overtimeOrderCount: 0,
+  availableBoxCount: 0,
+  faultBoxCount: 0
 })
 
-const lockerList = ref([
-  { id: 'L001', location: '重庆大学A区1号门', totalCompartments: 8, usedCompartments: 5, electricity: 2.3, status: '正常' },
-  { id: 'L002', location: '重庆大学A区2号门', totalCompartments: 8, usedCompartments: 8, electricity: 2.8, status: '正常' },
-  { id: 'L003', location: '重庆大学B区食堂', totalCompartments: 6, usedCompartments: 3, electricity: 1.9, status: '正常' },
-  { id: 'L004', location: '重庆大学C区图书馆', totalCompartments: 8, usedCompartments: 6, electricity: 2.5, status: '正常' },
-  { id: 'L005', location: '重庆大学D区宿舍', totalCompartments: 8, usedCompartments: 0, electricity: 0, status: '故障' }
-])
+const lockerList = ref([])
 
-onMounted(() => {
-  initLineChart()
-  initPieChart()
+const getUsageColor = (percentage) => {
+  if (percentage < 50) return '#67C23A'
+  if (percentage < 80) return '#E6A23C'
+  return '#F56C6C'
+}
+
+const loadDashboardStats = async () => {
+  statsLoading.value = true
+  try {
+    const res = await getDashboardStats()
+    Object.assign(stats, res.data)
+  } catch (error) {
+    console.error('加载统计数据失败:', error)
+  } finally {
+    statsLoading.value = false
+  }
+}
+
+const loadLockers = async () => {
+  lockerLoading.value = true
+  try {
+    const res = await getLockerList({ page: 1, pageSize: 10 })
+    lockerList.value = res.data.list || []
+  } catch (error) {
+    console.error('加载快递柜列表失败:', error)
+  } finally {
+    lockerLoading.value = false
+  }
+}
+
+const loadTrendData = async () => {
+  try {
+    const res = await getTrendData({ days: 7 })
+    if (res.data) {
+      initLineChart(res.data)
+    }
+  } catch (error) {
+    console.error('加载趋势数据失败:', error)
+    // 使用默认数据
+    initLineChart(null)
+  }
+}
+
+const loadDistributionData = async () => {
+  try {
+    const res = await getDistributionData()
+    if (res.data) {
+      initPieChart(res.data)
+    }
+  } catch (error) {
+    console.error('加载分布数据失败:', error)
+    // 使用默认数据
+    initPieChart(null)
+  }
+}
+
+onMounted(async () => {
+  await loadDashboardStats()
+  await loadLockers()
+  await nextTick()
+  loadTrendData()
+  loadDistributionData()
 })
 
-const initLineChart = () => {
+const initLineChart = (data) => {
   const chart = echarts.init(lineChartRef.value)
+  const defaultData = {
+    dates: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+    depositData: [0, 0, 0, 0, 0, 0, 0],
+    pickupData: [0, 0, 0, 0, 0, 0, 0]
+  }
+  const chartData = data || defaultData
+  
   chart.setOption({
     tooltip: { trigger: 'axis' },
-    legend: { data: ['入柜', '取件', '寄存'] },
+    legend: { data: ['入柜', '取件'] },
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+      data: chartData.dates
     },
     yAxis: { type: 'value' },
     series: [
-      { name: '入柜', type: 'line', smooth: true, data: [120, 132, 101, 134, 90, 230, 210] },
-      { name: '取件', type: 'line', smooth: true, data: [110, 125, 95, 128, 85, 220, 200] },
-      { name: '寄存', type: 'line', smooth: true, data: [20, 32, 18, 24, 15, 45, 38] }
+      { name: '入柜', type: 'line', smooth: true, data: chartData.depositData, areaStyle: { opacity: 0.3 } },
+      { name: '取件', type: 'line', smooth: true, data: chartData.pickupData, areaStyle: { opacity: 0.3 } }
     ]
   })
 }
 
-const initPieChart = () => {
+const initPieChart = (data) => {
   const chart = echarts.init(pieChartRef.value)
+  const used = data?.usedCount || stats.lockerCount - stats.availableBoxCount || 0
+  const available = data?.availableCount || stats.availableBoxCount || 0
+  
   chart.setOption({
     tooltip: { trigger: 'item' },
     legend: { bottom: '5%', left: 'center' },
@@ -162,11 +291,15 @@ const initPieChart = () => {
       emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } },
       labelLine: { show: false },
       data: [
-        { value: 68, name: '已使用' },
-        { value: 32, name: '空闲' }
+        { value: used, name: '已使用' },
+        { value: available, name: '空闲' }
       ]
     }]
   })
+}
+
+const goToCompartment = (lockerId) => {
+  router.push({ path: '/locker/compartment', query: { lockerId } })
 }
 </script>
 

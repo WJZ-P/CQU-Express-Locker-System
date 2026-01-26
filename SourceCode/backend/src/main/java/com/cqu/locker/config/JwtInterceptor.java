@@ -52,6 +52,16 @@ public class JwtInterceptor implements HandlerInterceptor {
             request.setAttribute("userId", userId);
             request.setAttribute("userType", userType);
             
+            // 管理端接口需要管理员权限
+            if (path.startsWith("/api/v1/admin/")) {
+                if (!"admin".equals(userType)) {
+                    log.warn("非管理员用户尝试访问管理端接口: userId={}, userType={}, path={}", 
+                            userId, userType, path);
+                    response.setStatus(403); // Forbidden
+                    return false;
+                }
+            }
+            
             return true;
         } catch (Exception e) {
             response.setStatus(401);
