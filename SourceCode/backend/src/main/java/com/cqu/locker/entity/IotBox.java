@@ -1,6 +1,7 @@
 package com.cqu.locker.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -33,8 +34,9 @@ public class IotBox {
     private Integer size;
     
     /**
-     * 格口类型：small/medium/large
+     * 格口类型：small/medium/large（非数据库字段，根据size计算）
      */
+    @TableField(exist = false)
     private String boxType;
     
     /**

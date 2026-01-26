@@ -2,6 +2,7 @@ package com.cqu.locker.controller.admin;
 
 import com.cqu.locker.entity.dto.admin.ChartDataItem;
 import com.cqu.locker.entity.dto.admin.DashboardStatsResponse;
+import com.cqu.locker.entity.dto.admin.TrendDataResponse;
 import com.cqu.locker.service.admin.AdminStatisticsService;
 import com.cqu.locker.utils.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 管理端-统计分析控制器
@@ -40,9 +42,9 @@ public class AdminStatisticsController {
      * 获取订单趋势数据
      */
     @GetMapping("/order-trend")
-    public Result<List<ChartDataItem>> getOrderTrend(@RequestParam(defaultValue = "7") Integer days) {
+    public Result<TrendDataResponse> getOrderTrend(@RequestParam(defaultValue = "7") Integer days) {
         try {
-            List<ChartDataItem> data = adminStatisticsService.getOrderTrend(days);
+            TrendDataResponse data = adminStatisticsService.getOrderTrendData(days);
             return Result.success(data);
         } catch (Exception e) {
             log.error("获取订单趋势失败", e);
@@ -104,6 +106,48 @@ public class AdminStatisticsController {
             return Result.success(data);
         } catch (Exception e) {
             log.error("获取每小时订单分布失败", e);
+            return Result.error(e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取月度订单统计
+     */
+    @GetMapping("/monthly-orders")
+    public Result<Map<String, Object>> getMonthlyOrders() {
+        try {
+            Map<String, Object> data = adminStatisticsService.getMonthlyOrders();
+            return Result.success(data);
+        } catch (Exception e) {
+            log.error("获取月度订单统计失败", e);
+            return Result.error(e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取格口使用率统计
+     */
+    @GetMapping("/box-usage")
+    public Result<Map<String, Object>> getBoxUsageStats() {
+        try {
+            Map<String, Object> data = adminStatisticsService.getBoxUsageStats();
+            return Result.success(data);
+        } catch (Exception e) {
+            log.error("获取格口使用率统计失败", e);
+            return Result.error(e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取用电量统计
+     */
+    @GetMapping("/power-stats")
+    public Result<Map<String, Object>> getPowerStats() {
+        try {
+            Map<String, Object> data = adminStatisticsService.getPowerStats();
+            return Result.success(data);
+        } catch (Exception e) {
+            log.error("获取用电量统计失败", e);
             return Result.error(e.getMessage());
         }
     }

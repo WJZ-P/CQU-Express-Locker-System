@@ -1,5 +1,6 @@
 package com.cqu.locker.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -16,8 +17,9 @@ public class SysCourier {
      */
     private String name;
     /**
-     * 手机号
+     * 手机号（非数据库字段，需从sys_user关联查询）
      */
+    @TableField(exist = false)
     private String phone;
     private String company;
     private String employeeId;

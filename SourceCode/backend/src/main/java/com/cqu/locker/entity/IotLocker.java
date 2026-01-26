@@ -1,6 +1,7 @@
 package com.cqu.locker.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -26,8 +27,9 @@ public class IotLocker {
     private String serialNo;
     
     /**
-     * 别名（兼容lockerNo字段）
+     * 别名（兼容lockerNo字段，非数据库字段）
      */
+    @TableField(exist = false)
     private String lockerNo;
 
     /**
@@ -36,13 +38,15 @@ public class IotLocker {
     private String name;
     
     /**
-     * 总格口数
+     * 总格口数（非数据库字段，需动态计算）
      */
+    @TableField(exist = false)
     private Integer totalBox;
     
     /**
-     * 可用格口数
+     * 可用格口数（非数据库字段，需动态计算）
      */
+    @TableField(exist = false)
     private Integer availableBox;
 
     /**

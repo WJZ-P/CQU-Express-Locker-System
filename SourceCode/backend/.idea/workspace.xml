@@ -6,42 +6,35 @@
   <component name="ChangeListManager">
     <list default="true" id="313e9730-5bc8-450f-840d-fa1629f565be" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/controller/admin/AdminStatisticsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/controller/admin/AdminStatisticsController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/BusOrder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/BusOrder.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/IotBox.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/IotBox.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/IotLocker.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/IotLocker.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/RelCourierLocker.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/RelUserLocker.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/SysConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/SysConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/SysCourier.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/SysCourier.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/mapper/RelCourierLockerMapper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/mapper/RelUserLockerMapper.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/LockerApplication.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/config/MybatisPlusConfig.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/StatisticsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/StatisticsController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/SystemController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/controller/SystemController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/dto/admin/DashboardStatsResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/entity/dto/admin/DashboardStatsResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/AdminStatisticsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/AdminStatisticsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/impl/AdminCompartmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/impl/AdminCompartmentServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/impl/AdminExpressServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/impl/AdminExpressServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/impl/AdminStatisticsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cqu/locker/service/admin/impl/AdminStatisticsServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/BusOrder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/BusOrder.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/IotBox.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/IotBox.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/IotLocker.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/IotLocker.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysConfig.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysCourier.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysCourier.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysUser.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/SysUser.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/dto/LoginRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/dto/LoginResponse$LoginResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/dto/LoginResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/dto/RegisterResponse$RegisterResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/dto/RegisterResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/entity/dto/SendCodeRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/mapper/SysConfigMapper.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/BusOrderService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/SysCourierService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/SysUserService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/BusOrderServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/SysConfigServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/SysCourierServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/service/impl/SysUserServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/utils/JwtUtil.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/utils/JwtUtil.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/utils/Result.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/utils/Result.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/utils/VerifyCodeUtil$CodeInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/utils/VerifyCodeUtil$CodeInfo.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cqu/locker/utils/VerifyCodeUtil.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cqu/locker/utils/VerifyCodeUtil.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/api/express.js" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/api/express.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/api/locker.js" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/api/locker.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/api/statistics.js" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/api/statistics.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/api/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/api/user.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/dashboard/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/dashboard/index.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/express/list.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/express/list.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/express/storage.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/express/storage.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/locker/compartment.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/locker/compartment.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/locker/list.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/locker/list.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/statistics/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/statistics/index.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/system/config.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/system/config.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/user/courier.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/user/courier.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/user/list.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/user/list.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -137,7 +130,7 @@
       <workItem from="1768736427103" duration="1645000" />
       <workItem from="1768741753536" duration="122000" />
       <workItem from="1769052811707" duration="1538000" />
-      <workItem from="1769404531098" duration="453000" />
+      <workItem from="1769404531098" duration="1712000" />
     </task>
     <servers />
   </component>

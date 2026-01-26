@@ -16,6 +16,8 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 管理端快递订单服务实现类
@@ -53,9 +55,19 @@ public class AdminExpressServiceImpl implements AdminExpressService {
             wrapper.eq(BusOrder::getCompany, request.getCompany());
         }
         
-        // 快递柜筛选
+        // 快递柜筛选（通过boxId关联）
         if (request.getLockerId() != null) {
-            wrapper.eq(BusOrder::getLockerId, request.getLockerId());
+            LambdaQueryWrapper<IotBox> boxWrapper = new LambdaQueryWrapper<>();
+            boxWrapper.eq(IotBox::getLockerId, request.getLockerId());
+            boxWrapper.select(IotBox::getId);
+            List<IotBox> boxes = boxMapper.selectList(boxWrapper);
+            if (!boxes.isEmpty()) {
+                List<Long> boxIds = boxes.stream().map(IotBox::getId).collect(java.util.stream.Collectors.toList());
+                wrapper.in(BusOrder::getBoxId, boxIds);
+            } else {
+                // 该快递柜没有格口，返回空结果
+                wrapper.eq(BusOrder::getId, -1);
+            }
         }
         
         // 快递员筛选
@@ -79,8 +91,8 @@ public class AdminExpressServiceImpl implements AdminExpressService {
                 case "createTime":
                     wrapper.orderBy(true, isAsc, BusOrder::getCreateTime);
                     break;
-                case "pickupTime":
-                    wrapper.orderBy(true, isAsc, BusOrder::getPickupTime);
+                case "finishTime":
+                    wrapper.orderBy(true, isAsc, BusOrder::getFinishTime);
                     break;
                 default:
                     wrapper.orderByDesc(BusOrder::getCreateTime);
@@ -142,7 +154,7 @@ public class AdminExpressServiceImpl implements AdminExpressService {
         BusOrder updateOrder = new BusOrder();
         updateOrder.setId(id);
         updateOrder.setStatus(1); // 已取件
-        updateOrder.setPickupTime(LocalDateTime.now());
+        updateOrder.setFinishTime(LocalDateTime.now());
         updateOrder.setUpdateTime(LocalDateTime.now());
         orderMapper.updateById(updateOrder);
         

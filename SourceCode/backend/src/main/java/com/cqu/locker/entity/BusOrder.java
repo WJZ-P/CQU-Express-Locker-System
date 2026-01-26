@@ -1,6 +1,7 @@
 package com.cqu.locker.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -17,12 +18,14 @@ public class BusOrder {
     private Long id;
     private String orderNo;
     /**
-     * 快递单号（兼容expressNo字段）
+     * 快递单号（非数据库字段，兼容expressNo，实际使用trackingNo）
      */
+    @TableField(exist = false)
     private String expressNo;
     /**
-     * 快递柜ID（通过boxId关联查询）
+     * 快递柜ID（非数据库字段，通过boxId关联查询）
      */
+    @TableField(exist = false)
     private Long lockerId;
     /**
      * 类型：1-投递，2-寄件，3-寄存
@@ -80,9 +83,8 @@ public class BusOrder {
     private LocalDateTime notificationTime;
     private LocalDateTime createTime;
     /**
-     * 取件时间
+     * 取件/完成时间
      */
-    private LocalDateTime pickupTime;
     private LocalDateTime finishTime;
     private LocalDateTime updateTime;
 }

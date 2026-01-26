@@ -87,8 +87,11 @@ public class AdminCompartmentServiceImpl implements AdminCompartmentService {
         box.setLockerId(request.getLockerId());
         box.setBoxNo(request.getBoxNo());
         box.setBoxType(request.getBoxType());
+        // 根据boxType设置size
+        box.setSize(boxTypeToSize(request.getBoxType()));
         box.setEnabled(request.getEnabled());
         box.setStatus(0); // 默认空闲
+        box.setIsLocked(1); // 默认锁定
         box.setCreateTime(LocalDateTime.now());
         box.setUpdateTime(LocalDateTime.now());
         
@@ -98,6 +101,19 @@ public class AdminCompartmentServiceImpl implements AdminCompartmentService {
         updateLockerBoxCount(request.getLockerId());
         
         return box;
+    }
+    
+    /**
+     * 将boxType转换为size值
+     */
+    private Integer boxTypeToSize(String boxType) {
+        if (boxType == null) return 2; // 默认中号
+        switch (boxType.toLowerCase()) {
+            case "small": return 1;
+            case "large": return 3;
+            case "medium":
+            default: return 2;
+        }
     }
     
     @Override

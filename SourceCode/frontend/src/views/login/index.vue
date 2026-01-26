@@ -79,7 +79,7 @@ const handleLogin = async () => {
   try {
     const res = await login(loginForm)
     
-    // 检查是否为管理员
+    // 检查是否为管理员（响应拦截器已返回 response.data，所以直接用 res.data）
     if (res.data.userType !== 'admin') {
       ElMessage.error('权限不足，Web管理平台仅限管理员登录')
       return
@@ -89,12 +89,13 @@ const handleLogin = async () => {
     localStorage.setItem('token', res.data.token)
     localStorage.setItem('userId', res.data.userId)
     localStorage.setItem('userType', res.data.userType)
-    localStorage.setItem('nickname', res.data.nickname)
+    localStorage.setItem('nickname', res.data.nickname || '')
     
     ElMessage.success('登录成功')
     router.push('/')
   } catch (error) {
     console.error('登录失败:', error)
+    // 错误已在拦截器中处理
   } finally {
     loading.value = false
   }
