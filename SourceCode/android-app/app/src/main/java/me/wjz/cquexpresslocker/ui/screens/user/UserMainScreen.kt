@@ -11,6 +11,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import me.wjz.cquexpresslocker.navigation.UserNavItem
 import me.wjz.cquexpresslocker.viewmodels.user.UserHomeViewModel
+import me.wjz.cquexpresslocker.viewmodels.user.UserPickupViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +32,7 @@ fun UserMainScreen(
     
     // 在 UserMainScreen 创建共享的 ViewModel
     val sharedUserHomeViewModel: UserHomeViewModel = viewModel()
+    val sharedUserPickupViewModel: UserPickupViewModel = viewModel()
     
     // 监听刷新信号
     LaunchedEffect(shouldRefreshProfile) {
@@ -97,11 +99,16 @@ fun UserMainScreen(
             composable(UserNavItem.Pickup.route) {
                 UserPickupScreen(
                     onNavigateToExpressDetail = onNavigateToExpressDetail,
-                    onNavigateToPickup = onNavigateToPickup
+                    onNavigateToPickup = onNavigateToPickup,
+                    viewModel = sharedUserPickupViewModel
                 )
             }
             composable(UserNavItem.Scan.route) {
-                UserScanScreen()
+                UserScanScreen(
+                    onExpressPickedUp = { expressId ->
+                        sharedUserPickupViewModel.removeExpressAfterPickup(expressId)
+                    }
+                )
             }
             composable(UserNavItem.Storage.route) {
                 UserStorageScreen()

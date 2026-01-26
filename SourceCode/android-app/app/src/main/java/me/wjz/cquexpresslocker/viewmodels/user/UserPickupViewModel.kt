@@ -51,6 +51,21 @@ class UserPickupViewModel : ViewModel() {
         loadPendingExpress()
     }
     
+    /**
+     * 移除已取件的快递（局部更新，不需要重新加载整个列表）
+     */
+    fun removeExpressAfterPickup(expressId: String) {
+        val currentState = _uiState.value
+        if (currentState is UserPickupUiState.Success) {
+            val updatedItems = currentState.items.filter { it.expressId != expressId }
+            _uiState.value = if (updatedItems.isEmpty()) {
+                UserPickupUiState.Empty
+            } else {
+                UserPickupUiState.Success(updatedItems)
+            }
+        }
+    }
+    
     fun openCompartment(expressId: String) {
         viewModelScope.launch {
             try {

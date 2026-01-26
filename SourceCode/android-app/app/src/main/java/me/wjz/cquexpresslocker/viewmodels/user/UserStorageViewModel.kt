@@ -55,7 +55,14 @@ class UserStorageViewModel : ViewModel() {
     fun loadLockerAvailability(lockerId: String) {
         viewModelScope.launch {
             try {
-                val response = ApiClient.apiService.getLockerAvailability(lockerId)
+                // 提取lockerId中的数字部分
+                val numericId = lockerId.filter { it.isDigit() }
+                if (numericId.isEmpty()) {
+                    _uiState.value = UserStorageUiState.Error("快递柜ID格式错误")
+                    return@launch
+                }
+                
+                val response = ApiClient.apiService.getLockerAvailability(numericId)
                 
                 if (response.code == 200 && response.data != null) {
                     _lockerAvailability.value = response.data

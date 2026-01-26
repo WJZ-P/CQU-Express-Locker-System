@@ -23,7 +23,7 @@ import me.wjz.cquexpresslocker.viewmodels.user.UserPickupViewModel
 fun UserPickupScreen(
     onNavigateToExpressDetail: (String) -> Unit,
     onNavigateToPickup: (String) -> Unit,
-    viewModel: UserPickupViewModel = viewModel()
+    viewModel: UserPickupViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var pickupCode by remember { mutableStateOf("") }

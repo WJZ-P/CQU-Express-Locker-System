@@ -11,12 +11,6 @@ import me.wjz.cquexpresslocker.network.CourierDeliverResponse
 import me.wjz.cquexpresslocker.network.BindLockerData
 import me.wjz.cquexpresslocker.network.ReceiverInfoData
 
-sealed class ReceiverQueryState {
-    object Idle : ReceiverQueryState()
-    object Loading : ReceiverQueryState()
-    data class Success(val receiver: ReceiverInfoData) : ReceiverQueryState()
-    data class Error(val message: String) : ReceiverQueryState()
-}
 
 sealed class DeliverState {
     object Idle : DeliverState()
