@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PickupResponse {
     
+    private String expressId;
     private String compartmentNo;
     private String lockerName;
 }

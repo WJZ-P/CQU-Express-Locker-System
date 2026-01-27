@@ -58,7 +58,7 @@ fun UserScanScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.height(24.dp))
-                        Button(onClick = { viewModel.simulateScan() }) {
+                        Button(onClick = { viewModel.openCamera() }) {
                             Icon(Icons.Default.CameraAlt, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("打开相机")
@@ -104,10 +104,27 @@ fun UserScanScreen(
                         tint = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("支持寄存、发快递等多种功能", fontSize = 14.sp)
+                    Text("输入取件码可取走他人寄存的物品", fontSize = 14.sp)
                 }
             }
         }
+    }
+    
+    // 功能选择菜单
+    if (uiState is ScanUiState.ShowFunctionMenu) {
+        FunctionMenuDialog(
+            onPickup = { viewModel.selectPickupFunction() },
+            onInputCode = { viewModel.selectInputCodeFunction() },
+            onCancel = { viewModel.cancel() }
+        )
+    }
+    
+    // 输入取件码对话框
+    if (uiState is ScanUiState.InputPickupCode) {
+        InputPickupCodeDialog(
+            onConfirm = { code -> viewModel.pickupByCode(code) },
+            onCancel = { viewModel.cancel() }
+        )
     }
     
     // 扫码结果对话框
@@ -129,6 +146,16 @@ fun UserScanScreen(
                 }
             )
         }
+        is ScanUiState.PickupByCodeSuccess -> {
+            PickupByCodeSuccessDialog(
+                compartmentNo = state.compartmentNo,
+                lockerName = state.lockerName,
+                onClose = {
+                    onExpressPickedUp(state.expressId)
+                    viewModel.cancel()
+                }
+            )
+        }
         is ScanUiState.Error -> {
             ErrorDialog(
                 message = state.message,
@@ -140,16 +167,157 @@ fun UserScanScreen(
                 onClose = { viewModel.cancel() }
             )
         }
-        is ScanUiState.PickupInProgress -> {
+        is ScanUiState.PickupInProgress, is ScanUiState.PickupByCodeInProgress -> {
             LoadingDialog()
         }
         is ScanUiState.Loading -> {
             LoadingDialog()
         }
-        is ScanUiState.Idle -> {
+        else -> {
             // 无对话框
         }
     }
+}
+
+@Composable
+private fun FunctionMenuDialog(
+    onPickup: () -> Unit,
+    onInputCode: () -> Unit,
+    onCancel: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text("选择功能") },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Card(
+                    onClick = onPickup,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Inventory,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("取件", fontWeight = FontWeight.Bold)
+                            Text(
+                                "取走您的快递或寄存物品",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+                
+                Card(
+                    onClick = onInputCode,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Password,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("输入取件码", fontWeight = FontWeight.Bold)
+                            Text(
+                                "使用他人分享的取件码取物",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onCancel) {
+                Text("取消")
+            }
+        }
+    )
+}
+
+@Composable
+private fun InputPickupCodeDialog(
+    onConfirm: (String) -> Unit,
+    onCancel: () -> Unit
+) {
+    var pickupCode by remember { mutableStateOf("") }
+    
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text("输入取件码") },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    "请输入他人分享给您的6位取件码",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = pickupCode,
+                    onValueChange = { 
+                        if (it.length <= 6 && it.all { c -> c.isDigit() }) {
+                            pickupCode = it 
+                        }
+                    },
+                    label = { Text("取件码") },
+                    placeholder = { Text("请输入6位数字") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = onCancel,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Text("取消")
+                }
+                Button(
+                    onClick = { onConfirm(pickupCode) },
+                    modifier = Modifier.weight(1f),
+                    enabled = pickupCode.length == 6
+                ) {
+                    Text("确定")
+                }
+            }
+        }
+    )
 }
 
 @Composable
@@ -250,6 +418,42 @@ private fun PickupSuccessDialog(
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Text("快递已开柜，请取走快递", fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(16.dp))
+                InfoRow("快递柜", lockerName)
+                InfoRow("格口号", compartmentNo)
+            }
+        },
+        confirmButton = {
+            Button(onClick = onClose, modifier = Modifier.fillMaxWidth()) {
+                Text("确定")
+            }
+        }
+    )
+}
+
+@Composable
+private fun PickupByCodeSuccessDialog(
+    compartmentNo: String,
+    lockerName: String,
+    onClose: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onClose,
+        title = { Text("取件成功") },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(bottom = 16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text("柜门已开启，请取走物品", fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(16.dp))
                 InfoRow("快递柜", lockerName)
                 InfoRow("格口号", compartmentNo)

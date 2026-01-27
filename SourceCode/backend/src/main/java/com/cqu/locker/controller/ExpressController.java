@@ -80,6 +80,21 @@ public class ExpressController {
     }
     
     /**
+     * 仅通过取件码取件（用于寄存物品共享场景）
+     */
+    @PostMapping("/v1/express/pickup-by-code")
+    public Result<PickupResponse> pickupByCode(
+            @Valid @RequestBody PickupByCodeRequest pickupRequest) {
+        try {
+            PickupResponse response = expressService.pickupByCode(pickupRequest);
+            return Result.success(response);
+        } catch (Exception e) {
+            log.error("通过取件码取件失败", e);
+            return Result.error(e.getMessage());
+        }
+    }
+    
+    /**
      * 开柜（已验证后再次开柜）
      */
     @PostMapping("/v1/express/open")

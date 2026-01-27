@@ -32,6 +32,13 @@ public interface ExpressService {
     PickupResponse pickup(PickupRequest request, Long userId);
     
     /**
+     * 仅通过取件码取件（用于寄存物品共享场景）
+     * @param request 取件码请求
+     * @return 取件响应
+     */
+    PickupResponse pickupByCode(PickupByCodeRequest request);
+    
+    /**
      * 开柜（已验证后再次开柜）
      * @param request 开柜请求
      * @param userId 用户ID

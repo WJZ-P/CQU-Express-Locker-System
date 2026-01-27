@@ -168,9 +168,17 @@ data class PickupExpressRequest(
 )
 
 /**
+ * 仅通过取件码取件请求
+ */
+data class PickupByCodeRequest(
+    val pickupCode: String
+)
+
+/**
  * 取件响应
  */
 data class PickupExpressData(
+    val expressId: String,
     val compartmentNo: String,
     val lockerName: String
 )
@@ -488,6 +496,12 @@ interface ApiService {
      */
     @POST("express/pickup")
     suspend fun pickupExpress(@Body request: PickupExpressRequest): ApiResponse<PickupExpressData>
+
+    /**
+     * 仅通过取件码取件（用于寄存物品共享场景）
+     */
+    @POST("express/pickup-by-code")
+    suspend fun pickupByCode(@Body request: PickupByCodeRequest): ApiResponse<PickupExpressData>
 
     /**
      * 开柜（已验证后再次开柜）

@@ -191,6 +191,52 @@ public class ExpressServiceImpl implements ExpressService {
         log.info("开启柜门：快递柜={}, 格口={}", locker.getLocation(), box.getBoxNo());
         
         return PickupResponse.builder()
+                .expressId(order.getOrderNo())
+                .compartmentNo(box.getBoxNo())
+                .lockerName(locker.getLocation())
+                .build();
+    }
+    
+    @Override
+    @Transactional
+    public PickupResponse pickupByCode(PickupByCodeRequest request) {
+        // 仅通过取件码查询订单（用于寄存物品共享场景）
+        LambdaQueryWrapper<BusOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(BusOrder::getPickupCode, request.getPickupCode())
+               .eq(BusOrder::getStatus, 0)  // 仅查询待取的订单
+               .last("limit 1");
+        BusOrder order = orderMapper.selectOne(wrapper);
+        
+        if (order == null) {
+            throw new RuntimeException("取件码无效或物品已被取走");
+        }
+        
+        // 获取格口信息
+        IotBox box = boxMapper.selectById(order.getBoxId());
+        if (box == null) {
+            throw new RuntimeException("格口信息不存在");
+        }
+        
+        // 获取快递柜信息
+        IotLocker locker = lockerMapper.selectById(box.getLockerId());
+        if (locker == null) {
+            throw new RuntimeException("快递柜信息不存在");
+        }
+        
+        // 更新订单状态为已取
+        order.setStatus(1);
+        order.setFinishTime(LocalDateTime.now());
+        orderMapper.updateById(order);
+        
+        // 更新格口状态为空闲
+        box.setStatus(0);
+        boxMapper.updateById(box);
+        
+        // 模拟开柜操作
+        log.info("通过取件码开柜：快递柜={}, 格口={}", locker.getLocation(), box.getBoxNo());
+        
+        return PickupResponse.builder()
+                .expressId(order.getOrderNo())
                 .compartmentNo(box.getBoxNo())
                 .lockerName(locker.getLocation())
                 .build();
