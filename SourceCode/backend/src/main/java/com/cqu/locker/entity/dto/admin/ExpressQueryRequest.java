@@ -43,4 +43,24 @@ public class ExpressQueryRequest extends PageRequest {
      * 结束时间
      */
     private String endTime;
+    
+    /**
+     * 订单类型：1-投递，2-寄件，3-寄存
+     */
+    private Integer type;
+    
+    /**
+     * 排除的订单类型（用于快递列表排除寄存记录）
+     */
+    private Integer excludeType;
+    
+    /**
+     * 收件人手机号
+     */
+    private String receiverPhone;
+    
+    /**
+     * 快递单号
+     */
+    private String expressNo;
 }

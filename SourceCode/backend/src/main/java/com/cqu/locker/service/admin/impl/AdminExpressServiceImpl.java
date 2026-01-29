@@ -4,9 +4,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cqu.locker.entity.BusOrder;
 import com.cqu.locker.entity.IotBox;
+import com.cqu.locker.entity.IotLocker;
+import com.cqu.locker.entity.SysCourier;
+import com.cqu.locker.entity.SysUser;
 import com.cqu.locker.entity.dto.admin.*;
 import com.cqu.locker.mapper.BusOrderMapper;
 import com.cqu.locker.mapper.IotBoxMapper;
+import com.cqu.locker.mapper.IotLockerMapper;
+import com.cqu.locker.mapper.SysCourierMapper;
+import com.cqu.locker.mapper.SysUserMapper;
 import com.cqu.locker.service.admin.AdminExpressService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,20 +32,32 @@ import java.util.stream.Collectors;
 @Service
 public class AdminExpressServiceImpl implements AdminExpressService {
     
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    
     @Autowired
     private BusOrderMapper orderMapper;
     
     @Autowired
     private IotBoxMapper boxMapper;
     
+    @Autowired
+    private IotLockerMapper lockerMapper;
+    
+    @Autowired
+    private SysCourierMapper courierMapper;
+    
+    @Autowired
+    private SysUserMapper userMapper;
+    
     @Override
     public PageResponse<BusOrder> queryOrders(ExpressQueryRequest request) {
         LambdaQueryWrapper<BusOrder> wrapper = new LambdaQueryWrapper<>();
         
-        // 关键词搜索
+        // 关键词搜索（使用trackingNo替代expressNo，因为expressNo是非数据库字段）
         if (StringUtils.hasText(request.getKeyword())) {
             wrapper.and(w -> w
-                    .like(BusOrder::getExpressNo, request.getKeyword())
+                    .like(BusOrder::getTrackingNo, request.getKeyword())
+                    .or().like(BusOrder::getOrderNo, request.getKeyword())
                     .or().like(BusOrder::getReceiverPhone, request.getKeyword())
                     .or().like(BusOrder::getPickupCode, request.getKeyword())
             );
@@ -75,6 +93,26 @@ public class AdminExpressServiceImpl implements AdminExpressService {
             wrapper.eq(BusOrder::getCourierId, request.getCourierId());
         }
         
+        // 订单类型筛选
+        if (request.getType() != null) {
+            wrapper.eq(BusOrder::getType, request.getType());
+        }
+        
+        // 排除指定类型（用于快递列表排除寄存记录）
+        if (request.getExcludeType() != null) {
+            wrapper.ne(BusOrder::getType, request.getExcludeType());
+        }
+        
+        // 收件人手机号筛选
+        if (StringUtils.hasText(request.getReceiverPhone())) {
+            wrapper.like(BusOrder::getReceiverPhone, request.getReceiverPhone());
+        }
+        
+        // 快递单号筛选
+        if (StringUtils.hasText(request.getExpressNo())) {
+            wrapper.like(BusOrder::getTrackingNo, request.getExpressNo());
+        }
+        
         // 时间范围筛选
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         if (StringUtils.hasText(request.getStartTime())) {
@@ -105,8 +143,60 @@ public class AdminExpressServiceImpl implements AdminExpressService {
         Page<BusOrder> page = new Page<>(request.getPage(), request.getPageSize());
         Page<BusOrder> result = orderMapper.selectPage(page, wrapper);
         
-        return PageResponse.of(result.getRecords(), result.getTotal(), 
+        // 填充关联信息
+        List<BusOrder> orders = result.getRecords();
+        for (BusOrder order : orders) {
+            fillOrderDetails(order);
+        }
+        
+        return PageResponse.of(orders, result.getTotal(), 
                 request.getPage(), request.getPageSize());
+    }
+    
+    /**
+     * 填充订单的关联信息
+     */
+    private void fillOrderDetails(BusOrder order) {
+        // 设置expressNo为trackingNo
+        order.setExpressNo(order.getTrackingNo());
+        
+        // 格式化时间
+        if (order.getCreateTime() != null) {
+            order.setDepositTime(order.getCreateTime().format(TIME_FORMATTER));
+        }
+        if (order.getFinishTime() != null) {
+            order.setPickupTime(order.getFinishTime().format(TIME_FORMATTER));
+        }
+        
+        // 获取格口和快递柜信息
+        if (order.getBoxId() != null) {
+            IotBox box = boxMapper.selectById(order.getBoxId());
+            if (box != null) {
+                order.setBoxNo(box.getBoxNo());
+                order.setLockerId(box.getLockerId());
+                
+                // 获取快递柜信息
+                IotLocker locker = lockerMapper.selectById(box.getLockerId());
+                if (locker != null) {
+                    order.setLockerName(locker.getName() != null ? locker.getName() : locker.getSerialNo());
+                }
+            }
+        }
+        
+        // 获取快递员信息
+        if (order.getCourierId() != null) {
+            SysCourier courier = courierMapper.selectById(order.getCourierId());
+            if (courier != null) {
+                order.setCourierName(courier.getName());
+                // 从关联的用户获取电话
+                if (courier.getUserId() != null) {
+                    SysUser courierUser = userMapper.selectById(courier.getUserId());
+                    if (courierUser != null) {
+                        order.setCourierPhone(courierUser.getPhone());
+                    }
+                }
+            }
+        }
     }
     
     @Override
@@ -115,6 +205,8 @@ public class AdminExpressServiceImpl implements AdminExpressService {
         if (order == null) {
             throw new RuntimeException("订单不存在");
         }
+        // 填充关联信息
+        fillOrderDetails(order);
         return order;
     }
     

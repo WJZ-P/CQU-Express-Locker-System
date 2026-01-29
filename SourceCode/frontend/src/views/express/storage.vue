@@ -72,12 +72,12 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { getOrderList } from '@/api/express'
+import { getStorageList } from '@/api/express'
 import { getLockerList } from '@/api/locker'
 
 const loading = ref(false)
 const lockerList = ref([])
-const searchForm = reactive({ receiverPhone: '', lockerId: '', status: '' })
+const searchForm = reactive({ receiverPhone: '', lockerId: null, status: null })
 const pagination = reactive({ page: 1, pageSize: 10, total: 0 })
 const tableData = ref([])
 
@@ -123,9 +123,9 @@ const loadData = async () => {
       pageSize: pagination.pageSize,
       receiverPhone: searchForm.receiverPhone || undefined,
       lockerId: searchForm.lockerId || undefined,
-      status: searchForm.status !== '' ? searchForm.status : undefined
+      status: searchForm.status != null ? searchForm.status : undefined
     }
-    const res = await getOrderList(params)
+    const res = await getStorageList(params)
     tableData.value = res.data.list || []
     pagination.total = res.data.total || 0
   } catch (error) {
@@ -146,7 +146,7 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  Object.assign(searchForm, { receiverPhone: '', lockerId: '', status: '' })
+  Object.assign(searchForm, { receiverPhone: '', lockerId: null, status: null })
   pagination.page = 1
   loadData()
 }
