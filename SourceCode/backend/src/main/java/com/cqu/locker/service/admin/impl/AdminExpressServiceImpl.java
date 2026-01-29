@@ -93,6 +93,26 @@ public class AdminExpressServiceImpl implements AdminExpressService {
             wrapper.eq(BusOrder::getCourierId, request.getCourierId());
         }
         
+        // 订单类型筛选
+        if (request.getType() != null) {
+            wrapper.eq(BusOrder::getType, request.getType());
+        }
+        
+        // 排除指定类型（用于快递列表排除寄存记录）
+        if (request.getExcludeType() != null) {
+            wrapper.ne(BusOrder::getType, request.getExcludeType());
+        }
+        
+        // 收件人手机号筛选
+        if (StringUtils.hasText(request.getReceiverPhone())) {
+            wrapper.like(BusOrder::getReceiverPhone, request.getReceiverPhone());
+        }
+        
+        // 快递单号筛选
+        if (StringUtils.hasText(request.getExpressNo())) {
+            wrapper.like(BusOrder::getTrackingNo, request.getExpressNo());
+        }
+        
         // 时间范围筛选
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         if (StringUtils.hasText(request.getStartTime())) {

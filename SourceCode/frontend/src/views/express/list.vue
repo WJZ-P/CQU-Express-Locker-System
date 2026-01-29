@@ -160,7 +160,8 @@ const loadData = async () => {
       expressNo: searchForm.expressNo || undefined,
       receiverPhone: searchForm.receiverPhone || undefined,
       lockerId: searchForm.lockerId || undefined,
-      status: searchForm.status != null ? searchForm.status : undefined
+      status: searchForm.status != null ? searchForm.status : undefined,
+      excludeType: 3  // 排除寄存记录(type=3)，只显示快递(type=1投递, type=2寄件)
     }
     const res = await getOrderList(params)
     tableData.value = res.data.list || []

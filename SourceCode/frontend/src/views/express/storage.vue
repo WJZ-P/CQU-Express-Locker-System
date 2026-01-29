@@ -72,7 +72,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { getOrderList } from '@/api/express'
+import { getStorageList } from '@/api/express'
 import { getLockerList } from '@/api/locker'
 
 const loading = ref(false)
@@ -125,7 +125,7 @@ const loadData = async () => {
       lockerId: searchForm.lockerId || undefined,
       status: searchForm.status != null ? searchForm.status : undefined
     }
-    const res = await getOrderList(params)
+    const res = await getStorageList(params)
     tableData.value = res.data.list || []
     pagination.total = res.data.total || 0
   } catch (error) {
