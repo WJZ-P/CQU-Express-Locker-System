@@ -161,8 +161,8 @@ const submitLoading = ref(false)
 const addFormRef = ref()
 
 const searchForm = reactive({
-  status: '',
-  enabled: ''
+  status: null,
+  enabled: null
 })
 
 const pagination = reactive({

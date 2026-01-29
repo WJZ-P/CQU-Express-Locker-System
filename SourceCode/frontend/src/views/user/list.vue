@@ -111,7 +111,7 @@ const dialogVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
 
-const searchForm = reactive({ phone: '', name: '', status: '' })
+const searchForm = reactive({ phone: '', name: '', status: null })
 const pagination = reactive({ page: 1, pageSize: 10, total: 0 })
 const tableData = ref([])
 
@@ -140,7 +140,7 @@ const loadData = async () => {
       pageSize: pagination.pageSize,
       phone: searchForm.phone || undefined,
       nickname: searchForm.name || undefined,
-      status: searchForm.status !== '' ? searchForm.status : undefined
+      status: searchForm.status != null ? searchForm.status : undefined
     }
     const res = await getUserList(params)
     tableData.value = res.data.list || []
@@ -164,7 +164,7 @@ const handleSearch = () => {
 const handleReset = () => {
   searchForm.phone = ''
   searchForm.name = ''
-  searchForm.status = ''
+  searchForm.status = null
   pagination.page = 1
   loadData()
 }
