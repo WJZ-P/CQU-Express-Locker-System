@@ -124,8 +124,8 @@ const formRef = ref()
 
 const searchForm = reactive({
   keyword: '',
-  status: '',
-  enabled: ''
+  status: null,
+  enabled: null
 })
 
 const pagination = reactive({
@@ -187,8 +187,8 @@ const handleSearch = () => {
 
 const handleReset = () => {
   searchForm.keyword = ''
-  searchForm.status = ''
-  searchForm.enabled = ''
+  searchForm.status = null
+  searchForm.enabled = null
   pagination.page = 1
   loadData()
 }

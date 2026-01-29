@@ -120,8 +120,8 @@ const lockerList = ref([])
 const searchForm = reactive({
   expressNo: '',
   receiverPhone: '',
-  lockerId: '',
-  status: ''
+  lockerId: null,
+  status: null
 })
 
 const pagination = reactive({
@@ -160,7 +160,7 @@ const loadData = async () => {
       expressNo: searchForm.expressNo || undefined,
       receiverPhone: searchForm.receiverPhone || undefined,
       lockerId: searchForm.lockerId || undefined,
-      status: searchForm.status !== '' ? searchForm.status : undefined
+      status: searchForm.status != null ? searchForm.status : undefined
     }
     const res = await getOrderList(params)
     tableData.value = res.data.list || []
@@ -183,7 +183,7 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  Object.assign(searchForm, { expressNo: '', receiverPhone: '', lockerId: '', status: '' })
+  Object.assign(searchForm, { expressNo: '', receiverPhone: '', lockerId: null, status: null })
   pagination.page = 1
   loadData()
 }
