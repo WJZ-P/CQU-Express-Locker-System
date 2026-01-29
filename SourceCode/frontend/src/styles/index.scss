@@ -18,3 +18,14 @@ a {
 ul, li {
   list-style: none;
 }
+
+// 修复搜索表单中 el-select 宽度不够的问题
+.search-form {
+  .el-select {
+    width: 180px;
+  }
+  
+  .el-input {
+    width: 180px;
+  }
+}

@@ -28,6 +28,36 @@ public class BusOrder {
     @TableField(exist = false)
     private Long lockerId;
     /**
+     * 快递柜名称（非数据库字段）
+     */
+    @TableField(exist = false)
+    private String lockerName;
+    /**
+     * 格口编号（非数据库字段）
+     */
+    @TableField(exist = false)
+    private String boxNo;
+    /**
+     * 快递员姓名（非数据库字段）
+     */
+    @TableField(exist = false)
+    private String courierName;
+    /**
+     * 快递员电话（非数据库字段）
+     */
+    @TableField(exist = false)
+    private String courierPhone;
+    /**
+     * 入柜时间（非数据库字段，格式化后的createTime）
+     */
+    @TableField(exist = false)
+    private String depositTime;
+    /**
+     * 取件时间（非数据库字段，格式化后的finishTime）
+     */
+    @TableField(exist = false)
+    private String pickupTime;
+    /**
      * 类型：1-投递，2-寄件，3-寄存
      */
     private Integer type; 

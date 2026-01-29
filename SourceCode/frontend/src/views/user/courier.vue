@@ -131,7 +131,7 @@ const dialogVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
 
-const searchForm = reactive({ courierNo: '', name: '', company: '', status: '' })
+const searchForm = reactive({ courierNo: '', name: '', company: '', status: null })
 const pagination = reactive({ page: 1, pageSize: 10, total: 0 })
 const tableData = ref([])
 
@@ -166,7 +166,7 @@ const loadData = async () => {
       courierNo: searchForm.courierNo || undefined,
       name: searchForm.name || undefined,
       company: searchForm.company || undefined,
-      status: searchForm.status !== '' ? searchForm.status : undefined
+      status: searchForm.status != null ? searchForm.status : undefined
     }
     const res = await getCourierList(params)
     tableData.value = res.data.list || []
@@ -191,7 +191,7 @@ const handleReset = () => {
   searchForm.courierNo = ''
   searchForm.name = ''
   searchForm.company = ''
-  searchForm.status = ''
+  searchForm.status = null
   pagination.page = 1
   loadData()
 }
